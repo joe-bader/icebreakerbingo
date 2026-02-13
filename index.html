@@ -4,14 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Icebreaker Bingo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #6366f1;
-            --secondary: #a855f7;
-            --accent: #ec4899;
-            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --card-bg: rgba(255, 255, 255, 0.95);
-            --text-color: #1f2937;
+            /* Arctic palette */
+            --bg-deep: #0b1628;
+            --bg-mid: #0f1f3d;
+            --aurora-cyan: rgba(56, 189, 248, 0.15);
+            --aurora-purple: rgba(139, 92, 246, 0.12);
+            --aurora-teal: rgba(45, 212, 191, 0.08);
+
+            /* Ice tile colors */
+            --ice-light: #d4e6f6;
+            --ice-mid: #b3ced8;
+            --ice-edge: #7ba6c9;
+            --ice-border: rgba(255, 255, 255, 0.45);
+            --ice-text: #152540;
+
+            /* Cracked ice — aurora glow beneath */
+            --cracked-glow: rgba(45, 212, 191, 0.4);
+
+            /* Gold center cell */
+            --gold: #d97706;
+            --gold-glow: rgba(251, 191, 36, 0.35);
+
+            /* UI surfaces */
+            --frost-surface: rgba(255, 255, 255, 0.07);
+            --frost-border: rgba(255, 255, 255, 0.10);
+            --text-light: #e2e8f0;
+            --text-bright: #ffffff;
+            --text-dim: #94a3b8;
+            --focus-ring: #38bdf8;
+
+            /* Shared */
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --content-max: 560px;
+            --sidebar-width: 300px;
         }
 
         * {
@@ -21,91 +55,644 @@
         }
 
         body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             min-height: 100vh;
+            background: var(--bg-deep);
+            background-image:
+                radial-gradient(ellipse at 30% 10%, var(--aurora-cyan) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 20%, var(--aurora-purple) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, var(--aurora-teal) 0%, transparent 50%),
+                radial-gradient(ellipse at 15% 90%, rgba(56, 189, 248, 0.06) 0%, transparent 40%),
+                radial-gradient(ellipse at 85% 60%, rgba(139, 92, 246, 0.06) 0%, transparent 40%);
+            color: var(--text-light);
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            background: var(--bg-gradient);
-            padding: 20px;
-            color: var(--text-color);
+            overflow-x: hidden;
         }
 
-        h2 {
-            font-size: 3.5rem;
-            margin-bottom: 2rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-            color: white;
+        /* ─── Skip Link (WCAG 2.4.1) ─── */
+        .skip-link {
+            position: absolute;
+            top: -100%;
+            left: 16px;
+            z-index: 2000;
+            background: var(--focus-ring);
+            color: var(--bg-deep);
+            padding: 0.75rem 1.25rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-decoration: none;
+            box-shadow: 0 4px 20px rgba(56, 189, 248, 0.4);
         }
 
-        .stats-bar {
+        .skip-link:focus {
+            top: 16px;
+            outline: 3px solid var(--text-bright);
+            outline-offset: 2px;
+        }
+
+        /* ─── Global Focus (WCAG 2.4.7) ─── */
+        :focus-visible {
+            outline: 3px solid var(--focus-ring);
+            outline-offset: 2px;
+        }
+
+        /* ─── Toast Notification ─── */
+        .share-toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 12px;
+            padding: 12px 24px;
             display: flex;
-            gap: 3rem;
-            margin-bottom: 2rem;
-            background: var(--card-bg);
-            padding: 1.5rem 3rem;
-            border-radius: 1rem;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-        }
-
-        .stat-item {
-            display: flex;
-            flex-direction: column;
             align-items: center;
-        }
-
-        .stat-label {
-            font-size: 1rem;
-            color: #6b7280;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .stat-value {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: var(--primary);
-        }
-
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
             gap: 10px;
-            max-width: 800px;
-            width: 100%;
-            margin: 0 auto;
+            color: #e2e8f0;
+            font-family: Inter, system-ui, sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(148, 163, 184, 0.08);
+            z-index: 10000;
+            opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
+            pointer-events: none;
+        }
+        .share-toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        .share-toast .toast-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .share-toast {
+                transition: opacity 0.2s ease;
+                transform: translateX(-50%) translateY(0);
+            }
         }
 
-        .grid-cell {
-            aspect-ratio: 1;
-            background: var(--card-bg);
-            border-radius: 10px;
+        /* ─── Share Panel Overlay ─── */
+        .share-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9000;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 10px;
+            background: rgba(2, 6, 18, 0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .share-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .share-panel {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(148, 163, 184, 0.15);
+            border-radius: 20px;
+            padding: 32px 28px 28px;
+            max-width: 400px;
+            width: 90vw;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(148, 163, 184, 0.06);
+            transform: translateY(24px) scale(0.96);
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+        .share-overlay.active .share-panel {
+            transform: translateY(0) scale(1);
+        }
+
+        .share-panel-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            line-height: 1;
+        }
+        .share-panel-close:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: var(--text-bright);
+        }
+
+        .share-panel-title {
+            font-family: Fredoka, Inter, system-ui, sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-bright);
             text-align: center;
-            font-size: 1rem;
+            margin: 0 0 6px;
+        }
+
+        .share-panel-hint {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            text-align: center;
+            margin: 0 0 24px;
+            line-height: 1.4;
+        }
+        .share-panel-hint .hint-icon {
+            color: #34d399;
+        }
+
+        /* Platform button grid */
+        .share-platforms {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .platform-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 12px 10px 10px;
+            width: 68px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-light);
             cursor: pointer;
             transition: all 0.2s ease;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            position: relative;
+            text-decoration: none;
+        }
+        .platform-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.18);
+            transform: translateY(-2px);
+        }
+        .platform-btn:active {
+            transform: translateY(0);
+        }
+        .platform-btn svg {
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+        .platform-btn .platform-label {
+            font-family: Inter, system-ui, sans-serif;
+            font-size: 0.65rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        /* Brand hover colors */
+        .platform-btn[data-platform="x"]:hover { border-color: #a8a8a8; box-shadow: 0 4px 16px rgba(168, 168, 168, 0.15); }
+        .platform-btn[data-platform="facebook"]:hover { border-color: #1877F2; box-shadow: 0 4px 16px rgba(24, 119, 242, 0.2); }
+        .platform-btn[data-platform="whatsapp"]:hover { border-color: #25D366; box-shadow: 0 4px 16px rgba(37, 211, 102, 0.2); }
+        .platform-btn[data-platform="email"]:hover { border-color: #f59e0b; box-shadow: 0 4px 16px rgba(245, 158, 11, 0.15); }
+
+        /* Secondary actions row */
+        .share-secondary {
+            display: flex;
+            gap: 10px;
+        }
+        .share-secondary button {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+            font-family: Inter, system-ui, sans-serif;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .share-secondary button:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: var(--text-bright);
+        }
+        .share-secondary button svg {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .share-overlay { transition: opacity 0.15s ease, visibility 0.15s ease; }
+            .share-panel { transition: none; transform: none; }
+            .platform-btn { transition: none; }
+            .platform-btn:hover { transform: none; }
+        }
+
+        /* ─── Decorative Snowflakes ─── */
+        .snowflakes {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
             overflow: hidden;
         }
 
+        .snowflake {
+            position: absolute;
+            top: -6%;
+            color: rgba(255, 255, 255, 0.12);
+            font-size: 1rem;
+            animation: snowfall linear infinite;
+            user-select: none;
+        }
+
+        .snowflake:nth-child(1)  { left: 5%;  font-size: 1.4rem; animation-duration: 18s; animation-delay: 0s; }
+        .snowflake:nth-child(2)  { left: 15%; font-size: 0.8rem; animation-duration: 24s; animation-delay: 3s; }
+        .snowflake:nth-child(3)  { left: 28%; font-size: 1.1rem; animation-duration: 20s; animation-delay: 7s; }
+        .snowflake:nth-child(4)  { left: 42%; font-size: 0.7rem; animation-duration: 26s; animation-delay: 1s; }
+        .snowflake:nth-child(5)  { left: 55%; font-size: 1.3rem; animation-duration: 22s; animation-delay: 5s; }
+        .snowflake:nth-child(6)  { left: 68%; font-size: 0.9rem; animation-duration: 19s; animation-delay: 10s; }
+        .snowflake:nth-child(7)  { left: 78%; font-size: 1.0rem; animation-duration: 25s; animation-delay: 4s; }
+        .snowflake:nth-child(8)  { left: 88%; font-size: 1.2rem; animation-duration: 21s; animation-delay: 8s; }
+        .snowflake:nth-child(9)  { left: 35%; font-size: 0.6rem; animation-duration: 28s; animation-delay: 12s; }
+        .snowflake:nth-child(10) { left: 92%; font-size: 0.7rem; animation-duration: 23s; animation-delay: 6s; }
+
+        @keyframes snowfall {
+            0%   { transform: translateY(-5vh) rotate(0deg);   opacity: 0; }
+            10%  { opacity: 1; }
+            90%  { opacity: 1; }
+            100% { transform: translateY(105vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* ─── Top Leaderboard Ad ─── */
+        .ad-leaderboard {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            padding: 8px 16px 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .ad-leaderboard .ad-slot {
+            width: 728px;
+            max-width: 100%;
+            height: 90px;
+        }
+
+        /* ─── Page Layout ─── */
+        .page-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 24px;
+            width: 100%;
+            max-width: 1200px;
+            padding: 12px 16px 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ─── Sidebar Ads ─── */
+        .ad-sidebar {
+            flex-shrink: 0;
+            width: var(--sidebar-width);
+            position: sticky;
+            top: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .ad-sidebar .ad-slot {
+            width: var(--sidebar-width);
+            height: 250px;
+        }
+
+        /* ─── Ad Slot Base ─── */
+        .ad-slot {
+            background: transparent;
+            border: none;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: transparent;
+            font-size: 0.8rem;
+        }
+
+        /* ─── Main Content ─── */
+        .main-content {
+            flex: 1;
+            max-width: var(--content-max);
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* ─── Header ─── */
+        .header {
+            text-align: center;
+            padding-top: 4px;
+        }
+
+        .header h1 {
+            font-family: 'Fredoka', 'Inter', sans-serif;
+            font-size: 2.6rem;
+            font-weight: 700;
+            color: var(--text-bright);
+            line-height: 1.1;
+            text-shadow:
+                0 0 30px rgba(56, 189, 248, 0.45),
+                0 0 60px rgba(56, 189, 248, 0.2),
+                0 2px 0 rgba(0, 0, 0, 0.15);
+            letter-spacing: -0.01em;
+        }
+
+        .header p {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            margin-top: 6px;
+            font-weight: 500;
+        }
+
+        /* ─── Stats Bar (Game HUD) ─── */
+        .stats-bar {
+            display: flex;
+            gap: 2px;
+            background: var(--frost-surface);
+            border: 1px solid var(--frost-border);
+            padding: 4px;
+            border-radius: var(--radius-lg);
+            box-shadow:
+                0 4px 24px rgba(0, 0, 0, 0.2),
+                inset 0 1px 1px rgba(255, 255, 255, 0.05);
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .stat-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 16px;
+            border-radius: var(--radius-md);
+            transition: background var(--transition);
+        }
+
+        .stat-item:hover {
+            background: rgba(56, 189, 248, 0.06);
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .stat-value {
+            font-family: 'Fredoka', 'Inter', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--focus-ring);
+            line-height: 1.2;
+            text-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
+        }
+
+        /* ─── Reset Button (below board) ─── */
+        .reset-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-family: 'Fredoka', 'Inter', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 0.55rem 1.5rem;
+            background: var(--frost-surface);
+            border: 1px solid var(--frost-border);
+            border-radius: 50px;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all var(--transition);
+            box-shadow:
+                0 3px 0 rgba(255, 255, 255, 0.04),
+                0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .reset-btn svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .reset-btn:hover {
+            background: rgba(56, 189, 248, 0.12);
+            border-color: rgba(56, 189, 248, 0.25);
+            color: var(--text-bright);
+            box-shadow:
+                0 3px 0 rgba(255, 255, 255, 0.04),
+                0 6px 18px rgba(0, 0, 0, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .reset-btn:active {
+            transform: translateY(1px);
+            box-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.04),
+                0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        .reset-btn:focus-visible {
+            outline: 3px solid var(--focus-ring);
+            outline-offset: 2px;
+        }
+
+        /* ─── Board Actions Row ─── */
+        .board-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        /* ─── Share Button ─── */
+        .share-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-family: 'Fredoka', 'Inter', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 0.55rem 1.5rem;
+            background: var(--frost-surface);
+            border: 1px solid var(--frost-border);
+            border-radius: 50px;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all var(--transition);
+            box-shadow:
+                0 3px 0 rgba(255, 255, 255, 0.04),
+                0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .share-btn svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .share-btn:hover {
+            background: rgba(56, 189, 248, 0.12);
+            border-color: rgba(56, 189, 248, 0.25);
+            color: var(--text-bright);
+            box-shadow:
+                0 3px 0 rgba(255, 255, 255, 0.04),
+                0 6px 18px rgba(0, 0, 0, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .share-btn:active {
+            transform: translateY(1px);
+            box-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.04),
+                0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        .share-btn:focus-visible {
+            outline: 3px solid var(--focus-ring);
+            outline-offset: 2px;
+        }
+
+        /* ─── Overlay Actions Row ─── */
+        .overlay-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .overlay-share-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: var(--text-light);
+            font-size: 1rem;
+            padding: 0.75rem 1.8rem;
+            box-shadow:
+                0 3px 0 rgba(255, 255, 255, 0.04),
+                0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .overlay-share-btn:hover {
+            background: rgba(255, 255, 255, 0.14);
+            border-color: rgba(255, 255, 255, 0.25);
+            color: var(--text-bright);
+        }
+
+        /* ─── Board Frame ─── */
+        .board-frame {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-xl);
+            padding: 14px;
+            box-shadow:
+                0 0 60px rgba(56, 189, 248, 0.06),
+                inset 0 1px 1px rgba(255, 255, 255, 0.04);
+            width: 100%;
+            overflow: hidden;
+        }
+
+        /* ─── Bingo Grid ─── */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 7px;
+            width: 100%;
+        }
+
+        /* ─── Ice Tile Cells ─── */
+        .grid-cell {
+            aspect-ratio: 1;
+            background: linear-gradient(155deg, #dae9f6 0%, #bdd4e8 60%, #a8c4dc 100%);
+            border: 1px solid var(--ice-border);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px;
+            text-align: center;
+            font-size: 0.74rem;
+            font-weight: 600;
+            line-height: 1.25;
+            cursor: pointer;
+            transition: transform var(--transition), box-shadow var(--transition);
+            box-shadow:
+                0 4px 0 var(--ice-edge),
+                0 6px 14px rgba(0, 0, 0, 0.25),
+                inset 0 2px 3px rgba(255, 255, 255, 0.7);
+            position: relative;
+            overflow: hidden;
+            color: var(--ice-text);
+        }
+
         .grid-cell:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-3px);
+            box-shadow:
+                0 7px 0 var(--ice-edge),
+                0 10px 24px rgba(0, 0, 0, 0.3),
+                inset 0 2px 3px rgba(255, 255, 255, 0.7);
+        }
+
+        .grid-cell:active {
+            transform: translateY(2px);
+            box-shadow:
+                0 1px 0 var(--ice-edge),
+                0 2px 6px rgba(0, 0, 0, 0.2),
+                inset 0 2px 3px rgba(255, 255, 255, 0.5);
+        }
+
+        /* Focus ring on label when child input is focused (WCAG 2.4.7) */
+        .grid-cell:focus-within {
+            outline: 3px solid var(--focus-ring);
+            outline-offset: 2px;
         }
 
         .grid-cell input {
             position: absolute;
+            inset: 0;
             width: 100%;
             height: 100%;
             opacity: 0;
             cursor: pointer;
-            z-index: 1;
+            z-index: 6;
+        }
+
+        .grid-cell input:focus-visible {
+            outline: none;
         }
 
         .grid-cell span {
@@ -116,51 +703,262 @@
             width: 100%;
             height: 100%;
             word-wrap: break-word;
-            line-height: 1.3;
+            overflow: hidden;
+            border-radius: calc(var(--radius-md) - 3px);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            padding: 2px;
+        }
+
+        /* ── Checked = Cracked ice revealing aurora beneath ── */
+        .grid-cell:has(input:checked) {
+            box-shadow:
+                0 4px 0 #134e4a,
+                0 6px 14px rgba(0, 0, 0, 0.3),
+                0 0 22px var(--cracked-glow),
+                inset 0 2px 3px rgba(255, 255, 255, 0.15);
+            background: linear-gradient(155deg, #14b8a6 0%, #8b5cf6 50%, #6d28d9 100%);
         }
 
         .grid-cell input:checked + span {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            border-radius: 6px;
-            animation: pulse 0.3s ease;
+            background: linear-gradient(135deg, #0f766e 0%, #5b21b6 100%);
+            color: var(--text-bright);
+            font-weight: 700;
+            animation: iceBreak 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
+        /*
+         * WCAG 1.4.1 (Use of Color): checked state is conveyed by
+         * the crack-line texture overlay, aurora gradient background,
+         * and the 3D depth-shadow shift — not color alone.
+         */
+
+        /* ── Ice-crack overlay on checked cells ── */
+        .grid-cell:has(input:checked)::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: 4;
+            pointer-events: none;
+            border-radius: inherit;
+            background:
+                /* Main diagonal crack */
+                linear-gradient(130deg,
+                    transparent 36%, rgba(255,255,255,0.55) 36%, rgba(255,255,255,0.55) 36.5%, transparent 36.5%,
+                    transparent 63%, rgba(255,255,255,0.40) 63%, rgba(255,255,255,0.40) 63.5%, transparent 63.5%),
+                /* Branch crack upper-right */
+                linear-gradient(68deg,
+                    transparent 42%, rgba(255,255,255,0.35) 42%, rgba(255,255,255,0.35) 42.4%, transparent 42.4%),
+                /* Branch crack lower-left */
+                linear-gradient(172deg,
+                    transparent 52%, rgba(255,255,255,0.30) 52%, rgba(255,255,255,0.30) 52.4%, transparent 52.4%),
+                /* Small fracture spur */
+                linear-gradient(30deg,
+                    transparent 69%, rgba(255,255,255,0.25) 69%, rgba(255,255,255,0.25) 69.3%, transparent 69.3%),
+                /* Micro fracture */
+                linear-gradient(95deg,
+                    transparent 28%, rgba(255,255,255,0.20) 28%, rgba(255,255,255,0.20) 28.3%, transparent 28.3%);
+            animation: cracksReveal 0.5s ease-out forwards;
+        }
+
+        /* ── Impact flash on checked cells ── */
+        .grid-cell:has(input:checked)::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: 5;
+            pointer-events: none;
+            border-radius: inherit;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.85) 0%, rgba(200, 230, 255, 0.35) 35%, transparent 65%);
+            animation: iceFlash 0.45s ease-out forwards;
+        }
+
+        /* ── Ice Shard Particles ── */
+        .ice-shard {
+            position: fixed;
+            pointer-events: none;
+            z-index: 100;
+            background: linear-gradient(135deg, rgba(218, 233, 246, 0.95), rgba(168, 196, 220, 0.8));
+            clip-path: polygon(15% 0%, 85% 5%, 100% 55%, 75% 100%, 5% 80%);
+            box-shadow: 0 0 4px rgba(200, 225, 255, 0.6);
+            animation: shardFly 0.65s ease-out forwards;
+        }
+
+        /* Alternate shard shape */
+        .ice-shard:nth-child(odd) {
+            clip-path: polygon(50% 0%, 95% 30%, 80% 100%, 10% 85%, 0% 20%);
+        }
+
+        /* ── Gold Star Center Cell ── */
         .center-cell {
-            background: linear-gradient(135deg, var(--secondary), var(--accent));
-            color: white;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
+            background: linear-gradient(155deg, #fbbf24 0%, #d97706 40%, #b45309 100%) !important;
+            border: 1px solid rgba(255, 255, 255, 0.35) !important;
+            color: var(--text-bright);
+            box-shadow:
+                0 4px 0 #92400e,
+                0 6px 14px rgba(0, 0, 0, 0.3),
+                0 0 28px rgba(251, 191, 36, 0.35),
+                inset 0 2px 4px rgba(255, 255, 255, 0.35) !important;
+            animation: goldPulse 3s ease-in-out infinite;
+        }
+
+        .center-cell:hover {
+            transform: translateY(-3px);
+            box-shadow:
+                0 7px 0 #92400e,
+                0 10px 24px rgba(0, 0, 0, 0.35),
+                0 0 40px rgba(251, 191, 36, 0.45),
+                inset 0 2px 4px rgba(255, 255, 255, 0.35) !important;
+        }
+
+        /* 3D gold star */
+        .center-cell .star-3d {
+            width: 55%;
+            height: 55%;
+            position: relative;
+            filter: drop-shadow(0 3px 4px rgba(120, 53, 15, 0.5));
+        }
+
+        /* Base star shape — golden gradient with metallic sheen */
+        .center-cell .star-3d .star-base {
+            fill: url(#goldGradient);
+        }
+
+        /* Highlight facet — lighter top-left for 3D bevel */
+        .center-cell .star-3d .star-highlight {
+            fill: url(#goldHighlight);
+            opacity: 0.6;
+        }
+
+        /* ─── Bottom Ad (mobile) ─── */
+        .ad-bottom {
+            display: none;
+            width: 100%;
+            padding: 0 16px 16px;
             justify-content: center;
-            box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
+            position: relative;
+            z-index: 1;
         }
 
-        .center-cell svg {
-            width: 70%;
-            height: 70%;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        .ad-bottom .ad-slot {
+            width: 100%;
+            max-width: 728px;
+            height: 60px;
         }
 
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+        /* ─── Footer ─── */
+        .footer {
+            text-align: center;
+            padding: 12px 16px 20px;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            position: relative;
+            z-index: 1;
         }
 
+        /* ─── Animations ─── */
+        @keyframes iceBreak {
+            0%   { transform: scale(1) rotate(0deg); }
+            12%  { transform: scale(1.08) rotate(-1.5deg); }
+            24%  { transform: scale(0.96) rotate(1deg); }
+            36%  { transform: scale(1.04) rotate(-0.5deg); }
+            50%  { transform: scale(0.98) rotate(0.3deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        @keyframes cracksReveal {
+            0%   { opacity: 0; clip-path: circle(0% at 50% 50%); }
+            40%  { opacity: 1; }
+            100% { opacity: 1; clip-path: circle(100% at 50% 50%); }
+        }
+
+        @keyframes iceFlash {
+            0%   { opacity: 1; transform: scale(0.3); }
+            100% { opacity: 0; transform: scale(1.2); }
+        }
+
+        @keyframes shardFly {
+            0% {
+                transform: translate(0, 0) rotate(0deg) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--shard-dx), var(--shard-dy)) rotate(var(--shard-rot)) scale(0.2);
+                opacity: 0;
+            }
+        }
+
+        @keyframes goldPulse {
+            0%, 100% { box-shadow:
+                0 4px 0 #92400e,
+                0 6px 14px rgba(0, 0, 0, 0.3),
+                0 0 28px rgba(251, 191, 36, 0.35),
+                inset 0 2px 4px rgba(255, 255, 255, 0.35);
+            }
+            50% { box-shadow:
+                0 4px 0 #92400e,
+                0 6px 14px rgba(0, 0, 0, 0.3),
+                0 0 44px rgba(251, 191, 36, 0.55),
+                inset 0 2px 4px rgba(255, 255, 255, 0.35);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(24px) scale(0.95); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes celebrateBounce {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            25%  { transform: scale(1.15) rotate(-3deg); }
+            50%  { transform: scale(1.05) rotate(2deg); }
+            75%  { transform: scale(1.1) rotate(-1deg); }
+        }
+
+        @keyframes sparklefall {
+            0% {
+                transform: translateY(-10vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% { opacity: 1; }
+            90% { opacity: 0.8; }
+            100% {
+                transform: translateY(110vh) rotate(540deg);
+                opacity: 0;
+            }
+        }
+
+        /* ─── Reduced Motion (WCAG 2.3.3) ─── */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+
+            .snowflakes {
+                display: none;
+            }
+        }
+
+        /* ─── Celebration Overlay ─── */
         .overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
+            inset: 0;
+            background: rgba(11, 22, 40, 0.85);
             display: none;
             align-items: center;
             justify-content: center;
             flex-direction: column;
             z-index: 1000;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
 
         .overlay.active {
@@ -168,124 +966,348 @@
             animation: fadeIn 0.3s ease;
         }
 
-        .overlay h2 {
-            font-size: 5rem;
-            margin-bottom: 1rem;
-            animation: bounce 1s infinite;
+        .overlay-card {
+            background: linear-gradient(165deg, #1e3a5f 0%, #0f1f3d 100%);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            border-radius: var(--radius-xl);
+            padding: 2.5rem 3rem;
+            text-align: center;
+            box-shadow:
+                0 8px 40px rgba(0, 0, 0, 0.4),
+                0 0 60px rgba(56, 189, 248, 0.1);
+            animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            max-width: 400px;
+            width: 90%;
         }
 
-        .overlay p {
-            font-size: 2rem;
-            color: #e5e7eb;
-            margin-bottom: 2rem;
+        .overlay-card .trophy {
+            font-size: 4rem;
+            line-height: 1;
+            margin-bottom: 0.75rem;
+            animation: celebrateBounce 1.5s ease-in-out infinite;
         }
 
-        .overlay button {
-            padding: 1.25rem 3rem;
-            font-size: 1.5rem;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
+        .overlay-card h2 {
+            font-family: 'Fredoka', 'Inter', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--text-bright);
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 24px rgba(56, 189, 248, 0.4);
+        }
+
+        .overlay-card p {
+            font-size: 1rem;
+            color: var(--text-dim);
+            margin-bottom: 1.75rem;
+            line-height: 1.5;
+        }
+
+        .overlay-card button {
+            font-family: 'Fredoka', 'Inter', sans-serif;
+            padding: 0.85rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--focus-ring), #0ea5e9);
+            color: var(--bg-deep);
             border: none;
             border-radius: 50px;
             cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+            transition: all var(--transition);
+            box-shadow:
+                0 4px 0 #0369a1,
+                0 6px 20px rgba(56, 189, 248, 0.35);
         }
 
-        .overlay button:hover {
+        .overlay-card button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+            box-shadow:
+                0 6px 0 #0369a1,
+                0 10px 30px rgba(56, 189, 248, 0.45);
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        .overlay-card button:focus-visible {
+            outline: 3px solid var(--text-bright);
+            outline-offset: 2px;
         }
 
-        @keyframes bounce {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+        .overlay-card button:active {
+            transform: translateY(2px);
+            box-shadow:
+                0 1px 0 #0369a1,
+                0 2px 8px rgba(56, 189, 248, 0.25);
         }
 
+        /* ─── Celebration Particles (Sparkles) ─── */
         .particle {
             position: fixed;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
             pointer-events: none;
-            animation: fall linear forwards;
+            animation: sparklefall linear forwards;
+            z-index: 1001;
         }
 
-        @keyframes fall {
-            0% {
-                transform: translateY(-100vh) rotate(0deg);
-                opacity: 1;
+        /* ─── Responsive: Hide sidebars ─── */
+        @media (max-width: 1080px) {
+            .ad-sidebar {
+                display: none;
             }
-            100% {
-                transform: translateY(100vh) rotate(720deg);
-                opacity: 0;
+
+            .page-wrapper {
+                max-width: var(--content-max);
+            }
+
+            .ad-bottom {
+                display: flex;
             }
         }
 
-        @media (max-width: 600px) {
+        /* ─── Responsive: Tablet ─── */
+        @media (max-width: 640px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header p {
+                font-size: 0.82rem;
+            }
+
+            .stats-bar {
+                max-width: 260px;
+            }
+
+            .stat-value {
+                font-size: 1.3rem;
+            }
+
             .grid-container {
                 gap: 5px;
             }
 
             .grid-cell {
-                font-size: 0.7rem;
+                font-size: 0.65rem;
                 padding: 4px;
+                border-radius: var(--radius-sm);
             }
 
-            h2 {
-                font-size: 2rem;
+            .grid-cell span {
+                border-radius: calc(var(--radius-sm) - 2px);
+            }
+
+            .board-frame {
+                padding: 10px;
+                border-radius: var(--radius-lg);
+            }
+
+            .ad-leaderboard .ad-slot {
+                height: 60px;
+            }
+
+            .ad-bottom .ad-slot {
+                height: 50px;
+            }
+
+            .overlay-card {
+                padding: 2rem;
+            }
+
+            .overlay-card .trophy {
+                font-size: 3rem;
+            }
+
+            .overlay-card h2 {
+                font-size: 1.6rem;
+            }
+
+            .overlay-card p {
+                font-size: 0.9rem;
+            }
+
+            .overlay-card button {
+                padding: 0.75rem 2rem;
+                font-size: 1rem;
+            }
+        }
+
+        /* ─── Responsive: Small phones ─── */
+        @media (max-width: 380px) {
+            .header h1 {
+                font-size: 1.7rem;
+            }
+
+            .grid-cell {
+                font-size: 0.6rem;
+                padding: 3px;
+                box-shadow:
+                    0 3px 0 var(--ice-edge),
+                    0 4px 8px rgba(0, 0, 0, 0.25),
+                    inset 0 1px 2px rgba(255, 255, 255, 0.6);
             }
 
             .stats-bar {
-                padding: 0.75rem 1rem;
-                gap: 1rem;
+                max-width: 220px;
             }
 
-            .stat-value {
-                font-size: 1.5rem;
+            .board-frame {
+                padding: 8px;
             }
-        }
 
-        @media (max-width: 1200px) {
             .grid-container {
-                max-width: 700px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .grid-container {
-                max-width: 600px;
+                gap: 4px;
             }
         }
     </style>
 </head>
 <body>
-    <h2>Icebreaker Bingo</h2>
-    
-    <div class="stats-bar">
-        <div class="stat-item">
-            <span class="stat-label">Checked</span>
-            <span class="stat-value" id="checkedCount">0</span>
-        </div>
-        <div class="stat-item">
-            <span class="stat-label">Wins</span>
-            <span class="stat-value" id="winsCount">0</span>
+    <!-- Skip Navigation (WCAG 2.4.1) -->
+    <a href="#bingo-game" class="skip-link">Skip to game board</a>
+
+    <!-- Decorative floating snowflakes -->
+    <div class="snowflakes" aria-hidden="true">
+        <div class="snowflake">&#10052;</div>
+        <div class="snowflake">&#10053;</div>
+        <div class="snowflake">&#10054;</div>
+        <div class="snowflake">&#10052;</div>
+        <div class="snowflake">&#10053;</div>
+        <div class="snowflake">&#10054;</div>
+        <div class="snowflake">&#10052;</div>
+        <div class="snowflake">&#10053;</div>
+        <div class="snowflake">&#10054;</div>
+        <div class="snowflake">&#10052;</div>
+    </div>
+
+    <!-- Top Leaderboard Ad -->
+    <div class="ad-leaderboard" role="complementary" aria-label="Advertisement">
+        <div class="ad-slot" id="adLeaderboard">Ad Space &mdash; 728 &times; 90</div>
+    </div>
+
+    <div class="page-wrapper">
+        <!-- Left Sidebar Ad -->
+        <aside class="ad-sidebar ad-sidebar-left" aria-label="Left advertisement">
+            <div class="ad-slot" id="adSidebarLeft">Ad Space &mdash; 300 &times; 250</div>
+        </aside>
+
+        <!-- Main Game Content -->
+        <main class="main-content" id="bingo-game" tabindex="-1">
+            <header class="header">
+                <h1>Icebreaker Bingo</h1>
+                <p>Find someone who matches each square</p>
+            </header>
+
+            <div class="stats-bar" role="status" aria-live="polite" aria-atomic="true" aria-label="Game statistics">
+                <div class="stat-item">
+                    <span class="stat-label" id="checkedLabel">Checked</span>
+                    <span class="stat-value" id="checkedCount" aria-labelledby="checkedLabel">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label" id="bingosLabel">Bingos</span>
+                    <span class="stat-value" id="winsCount" aria-labelledby="bingosLabel">0</span>
+                </div>
+            </div>
+
+            <section class="board-frame">
+                <div class="grid-container" id="gridContainer" role="grid" aria-label="Bingo board"></div>
+            </section>
+
+            <div class="board-actions">
+                <button class="reset-btn" id="resetBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                        <path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+                    </svg>
+                    New Board
+                </button>
+                <button class="share-btn" id="shareBtn" aria-label="Share board image">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                        <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                    </svg>
+                    Share
+                </button>
+            </div>
+        </main>
+
+        <!-- Right Sidebar Ad -->
+        <aside class="ad-sidebar ad-sidebar-right" aria-label="Right advertisement">
+            <div class="ad-slot" id="adSidebarRight">Ad Space &mdash; 300 &times; 250</div>
+        </aside>
+    </div>
+
+    <!-- Bottom Ad (visible when sidebars are hidden) -->
+    <div class="ad-bottom" role="complementary" aria-label="Advertisement">
+        <div class="ad-slot" id="adBottom">Ad Space &mdash; 728 &times; 90</div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+    <!-- Celebration Overlay -->
+    <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="overlayTitle" aria-describedby="overlayDesc">
+        <div class="overlay-card">
+            <div class="trophy" role="img" aria-hidden="true">&#127881;</div>
+            <h2 id="overlayTitle">Bingo!</h2>
+            <p id="overlayDesc">You broke the ice! Keep going for more bingos!</p>
+            <div class="overlay-actions">
+                <button id="newBoardBtn">Keep Playing</button>
+                <button class="share-btn overlay-share-btn" id="overlayShareBtn" aria-label="Share board image">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                        <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                    </svg>
+                    Share
+                </button>
+            </div>
         </div>
     </div>
 
-    <div class="grid-container" id="gridContainer">
+    <!-- Share Panel Overlay -->
+    <div class="share-overlay" id="shareOverlay" aria-hidden="true">
+        <div class="share-panel" role="dialog" aria-modal="true" aria-labelledby="sharePanelTitle">
+            <button class="share-panel-close" id="sharePanelClose" aria-label="Close share panel">&times;</button>
+            <h3 class="share-panel-title" id="sharePanelTitle">Share Your Board</h3>
+            <p class="share-panel-hint" id="sharePanelHint">
+                <span class="hint-icon">&#10003;</span> Image copied to clipboard &mdash; paste it in your post!
+            </p>
+            <div class="share-platforms">
+                <!-- X / Twitter -->
+                <button class="platform-btn" data-platform="x" aria-label="Share on X">
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                    <span class="platform-label">X</span>
+                </button>
+                <!-- Facebook -->
+                <button class="platform-btn" data-platform="facebook" aria-label="Share on Facebook">
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                    <span class="platform-label">Facebook</span>
+                </button>
+                <!-- WhatsApp -->
+                <button class="platform-btn" data-platform="whatsapp" aria-label="Share on WhatsApp">
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                    <span class="platform-label">WhatsApp</span>
+                </button>
+                <!-- Email -->
+                <button class="platform-btn" data-platform="email" aria-label="Share via Email">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                    <span class="platform-label">Email</span>
+                </button>
+            </div>
+            <div class="share-secondary">
+                <button id="shareCopyBtn" aria-label="Copy image to clipboard">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    Copy Image
+                </button>
+                <button id="shareDownloadBtn" aria-label="Download board image">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Download
+                </button>
+            </div>
+        </div>
     </div>
 
-    <div class="overlay" id="overlay">
-        <h2>🎉 Winner! 🎉</h2>
-        <p>Great job!</p>
-        <button onclick="closeOverlay()">Play Again</button>
+    <!-- Toast notification -->
+    <div class="share-toast" id="shareToast" aria-live="polite" aria-atomic="true">
+        <span class="toast-icon"></span>
+        <span class="toast-message"></span>
     </div>
+
+    <!-- Screen reader announcement region -->
+    <div id="srAnnounce" aria-live="assertive" aria-atomic="true" role="alert" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;"></div>
 
     <script>
         const questions = [
@@ -304,7 +1326,7 @@
             "Makes New Year's resolutions", "Good cook", "Taught a class", "Had a secret admirer", "Helped a stranger",
             "Got help from a stranger", "Worked at a family business", "Visited 4+ continents", "Took dance lessons", "Speaks 2+ languages",
             "Can code", "Won a contest", "Gardens", "Traveled in the last year", "Can bake a cake from scratch",
-            "Knows the whole periodic table", "Can do basic car repairs", "Was in a wedding party this year", "Owns cryptocurrency",
+            "Knows the whole periodic table", "Can do basic car repairs", "Was in a wedding party this year", "Owns crypto",
             "Invests in the stock market", "Climbed a mountain", "Moved in the past year", "Owns a boat", "Has a big backyard",
             "Digital nomad", "Notary public", "Lives near a coffee shop", "Lives in a rural area", "Can drive manual transmission",
             "Reads newspapers", "Does stand up comedy", "Owns a vacation house", "Started a business", "Firefighter or EMT",
@@ -362,27 +1384,87 @@
                 for (let col = 0; col < 5; col++) {
                     const cell = document.createElement('label');
                     cell.className = 'grid-cell';
-                    
+                    cell.setAttribute('role', 'gridcell');
+
                     if (row === 2 && col === 2) {
                         cell.classList.add('center-cell');
-                        cell.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.63L12 2L9.19 8.63L2 9.24L7.46 13.97L5.82 21L12 17.27Z"/></svg>`;
+                        cell.innerHTML = `
+                            <svg class="star-3d" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <defs>
+                                    <linearGradient id="goldGradient" x1="0" y1="0" x2="1" y2="1">
+                                        <stop offset="0%" stop-color="#fde68a"/>
+                                        <stop offset="40%" stop-color="#f59e0b"/>
+                                        <stop offset="100%" stop-color="#b45309"/>
+                                    </linearGradient>
+                                    <linearGradient id="goldHighlight" x1="0" y1="0" x2="0.5" y2="1">
+                                        <stop offset="0%" stop-color="#ffffff"/>
+                                        <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+                                    </linearGradient>
+                                </defs>
+                                <path class="star-base" d="M12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.63L12 2L9.19 8.63L2 9.24L7.46 13.97L5.82 21L12 17.27Z"/>
+                                <path class="star-highlight" d="M12 2L14.81 8.63L22 9.24L16.54 13.97L18.18 21L12 17.27L5.82 21L7.46 13.97L2 9.24L9.19 8.63L12 2Z" clip-path="polygon(0 0, 100% 0, 40% 60%)"/>
+                            </svg>
+                        `;
+                        cell.setAttribute('aria-label', 'Free space, always checked');
                         cells[row * 5 + col] = true;
                     } else {
+                        const promptText = shuffled[index];
                         cell.innerHTML = `
-                            <input type="checkbox" onchange="toggleCell(${row}, ${col})">
-                            <span>${shuffled[index++]}</span>
+                            <input type="checkbox" onchange="toggleCell(${row}, ${col})" aria-label="${promptText}">
+                            <span>${promptText}</span>
                         `;
+                        index++;
                     }
                     grid.appendChild(cell);
                 }
             }
+            updateStats();
         }
 
         function toggleCell(row, col) {
             const index = row * 5 + col;
             cells[index] = !cells[index];
             updateStats();
+            // Spawn ice shards when checking (not unchecking)
+            if (cells[index]) {
+                spawnIceShards(index);
+            }
             checkWins();
+        }
+
+        /** Burst ice shard particles outward from a cell */
+        function spawnIceShards(cellIndex) {
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+            const cellEl = grid.children[cellIndex];
+            if (!cellEl) return;
+            const rect = cellEl.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+
+            const shardCount = 10;
+            for (let i = 0; i < shardCount; i++) {
+                const shard = document.createElement('div');
+                shard.className = 'ice-shard';
+                shard.setAttribute('aria-hidden', 'true');
+
+                const angle = (i / shardCount) * 360 + (Math.random() * 30 - 15);
+                const distance = 35 + Math.random() * 55;
+                const rad = angle * Math.PI / 180;
+                const size = 5 + Math.random() * 9;
+
+                shard.style.left = (cx - size / 2) + 'px';
+                shard.style.top = (cy - size / 2) + 'px';
+                shard.style.width = size + 'px';
+                shard.style.height = (size * 1.3) + 'px';
+                shard.style.setProperty('--shard-dx', (Math.cos(rad) * distance) + 'px');
+                shard.style.setProperty('--shard-dy', (Math.sin(rad) * distance) + 'px');
+                shard.style.setProperty('--shard-rot', (Math.random() * 540 - 270) + 'deg');
+                shard.style.animationDelay = (Math.random() * 0.08) + 's';
+
+                document.body.appendChild(shard);
+                shard.addEventListener('animationend', () => shard.remove());
+            }
         }
 
         function updateStats() {
@@ -404,28 +1486,39 @@
         }
 
         function showOverlay() {
-            document.getElementById('overlay').classList.add('active');
+            const overlay = document.getElementById('overlay');
+            overlay.classList.add('active');
+            announce('Bingo! You broke the ice!');
+            const btn = document.getElementById('newBoardBtn');
+            if (btn) btn.focus();
         }
 
         function closeOverlay() {
-            document.getElementById('overlay').classList.remove('active');
+            const overlay = document.getElementById('overlay');
+            overlay.classList.remove('active');
             clearParticles();
-            shuffled = shuffleArray([...questions]).slice(0, 24);
-            cells.fill(false);
-            completedPatterns.clear();
-            wins = 0;
-            document.getElementById('winsCount').textContent = wins;
-            grid.innerHTML = '';
-            createGrid();
+            document.getElementById('bingo-game').focus();
+        }
+
+        function announce(message) {
+            const el = document.getElementById('srAnnounce');
+            el.textContent = '';
+            requestAnimationFrame(() => { el.textContent = message; });
         }
 
         function createParticles() {
-            const colors = ['#6366f1', '#a855f7', '#ec4899', '#f59e0b', '#10b981'];
-            for (let i = 0; i < 80; i++) {
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+            const shapes = ['&#10052;', '&#10053;', '&#10054;', '&#10040;', '&#9733;'];
+            const colors = ['#38bdf8', '#818cf8', '#a78bfa', '#67e8f9', '#f0abfc', '#fbbf24'];
+            for (let i = 0; i < 50; i++) {
                 const particle = document.createElement('div');
                 particle.className = 'particle';
+                particle.setAttribute('aria-hidden', 'true');
+                particle.innerHTML = shapes[Math.floor(Math.random() * shapes.length)];
                 particle.style.left = `${Math.random() * 100}vw`;
-                particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.color = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.fontSize = `${Math.random() * 14 + 10}px`;
                 particle.style.animationDuration = `${Math.random() * 3 + 2}s`;
                 particle.style.animationDelay = `${Math.random() * 2}s`;
                 document.body.appendChild(particle);
@@ -436,9 +1529,309 @@
             document.querySelectorAll('.particle').forEach(p => p.remove());
         }
 
+        // Close overlay on background click
         document.getElementById('overlay').addEventListener('click', (e) => {
-            if (e.target.id === 'overlay') {
-                closeOverlay();
+            if (e.target.id === 'overlay') closeOverlay();
+        });
+
+        // Escape key closes topmost overlay (WCAG 2.1.1)
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const shareOverlay = document.getElementById('shareOverlay');
+                if (shareOverlay.classList.contains('active')) {
+                    closeSharePanel();
+                    return;
+                }
+                const overlay = document.getElementById('overlay');
+                if (overlay.classList.contains('active')) closeOverlay();
+            }
+        });
+
+        // Focus trap inside overlay dialog (WCAG 2.4.3)
+        document.getElementById('overlay').addEventListener('keydown', (e) => {
+            if (e.key !== 'Tab') return;
+            const overlay = document.getElementById('overlay');
+            if (!overlay.classList.contains('active')) return;
+
+            const focusable = overlay.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+            if (focusable.length === 0) return;
+
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+
+            if (e.shiftKey) {
+                if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+            } else {
+                if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+            }
+        });
+
+        document.getElementById('newBoardBtn').addEventListener('click', closeOverlay);
+
+        document.getElementById('resetBtn').addEventListener('click', resetBoard);
+        document.getElementById('shareBtn').addEventListener('click', shareBoard);
+        document.getElementById('overlayShareBtn').addEventListener('click', shareBoard);
+
+        function resetBoard() {
+            clearParticles();
+            shuffled = shuffleArray([...questions]).slice(0, 24);
+            cells.fill(false);
+            completedPatterns.clear();
+            wins = 0;
+            document.getElementById('winsCount').textContent = wins;
+            grid.innerHTML = '';
+            createGrid();
+        }
+
+        // ─── Share Panel Logic ───
+
+        const SHARE_TEXT = 'Check out my Icebreaker Bingo board! Play at icebreakerbingo.com';
+        const SHARE_URL = 'https://icebreakerbingo.com';
+        let currentImageBlob = null;
+
+        function showToast(icon, message, duration = 3000) {
+            const toast = document.getElementById('shareToast');
+            toast.querySelector('.toast-icon').textContent = icon;
+            toast.querySelector('.toast-message').textContent = message;
+            toast.classList.add('show');
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => toast.classList.remove('show'), duration);
+        }
+
+        function openSharePanel() {
+            const overlay = document.getElementById('shareOverlay');
+            overlay.classList.add('active');
+            overlay.setAttribute('aria-hidden', 'false');
+            document.getElementById('sharePanelClose').focus();
+        }
+
+        function closeSharePanel() {
+            const overlay = document.getElementById('shareOverlay');
+            overlay.classList.remove('active');
+            overlay.setAttribute('aria-hidden', 'true');
+        }
+
+        async function copyImageToClipboard(blob) {
+            try {
+                const item = new ClipboardItem({ 'image/png': blob });
+                await navigator.clipboard.write([item]);
+                return true;
+            } catch (err) {
+                console.warn('Clipboard write failed:', err);
+                return false;
+            }
+        }
+
+        function downloadImage(blob) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'icebreaker-bingo.png';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        async function generateBoardImage() {
+            const boardEl = document.querySelector('.board-frame');
+            if (!boardEl || typeof html2canvas === 'undefined') return null;
+
+            const wrapper = document.createElement('div');
+            wrapper.style.cssText = `
+                position: fixed; left: -9999px; top: 0;
+                background: #0b1628;
+                padding: 32px 28px 24px;
+                border-radius: 24px;
+                display: flex; flex-direction: column; align-items: center; gap: 16px;
+            `;
+
+            const title = document.createElement('div');
+            title.textContent = 'Icebreaker Bingo';
+            title.style.cssText = `
+                font-family: Fredoka, Inter, system-ui, sans-serif;
+                font-size: 24px; font-weight: 700; color: #ffffff;
+                text-shadow: 0 0 24px rgba(56,189,248,0.4);
+                text-align: center;
+            `;
+            wrapper.appendChild(title);
+
+            const boardClone = boardEl.cloneNode(true);
+            boardClone.style.background = '#111d32';
+            boardClone.style.border = '1px solid rgba(255,255,255,0.10)';
+            boardClone.style.maxWidth = boardEl.offsetWidth + 'px';
+
+            const captureStyle = document.createElement('style');
+            captureStyle.textContent = `.grid-cell::before, .grid-cell::after { display: none !important; }`;
+            boardClone.prepend(captureStyle);
+
+            boardClone.querySelectorAll('.grid-cell').forEach(cell => {
+                const input = cell.querySelector('input');
+                const isChecked = input && input.checked;
+                const span = cell.querySelector('span');
+
+                cell.style.backdropFilter = 'none';
+                cell.style.webkitBackdropFilter = 'none';
+
+                if (cell.classList.contains('center-cell')) return;
+
+                if (isChecked) {
+                    cell.style.background = 'linear-gradient(155deg, #14b8a6 0%, #8b5cf6 50%, #6d28d9 100%)';
+                    cell.style.boxShadow = '0 4px 0 #134e4a, 0 6px 14px rgba(0,0,0,0.3)';
+                    if (span) {
+                        span.style.background = 'linear-gradient(135deg, #0f766e 0%, #5b21b6 100%)';
+                        span.style.borderRadius = '9px';
+                    }
+                } else {
+                    cell.style.background = 'linear-gradient(155deg, #dae9f6 0%, #bdd4e8 60%, #a8c4dc 100%)';
+                    cell.style.boxShadow = '0 4px 0 #7ba6c9, 0 6px 14px rgba(0,0,0,0.25)';
+                    if (span) {
+                        span.style.background = 'transparent';
+                        span.style.boxShadow = 'none';
+                    }
+                }
+            });
+
+            wrapper.appendChild(boardClone);
+
+            const cta = document.createElement('div');
+            cta.textContent = 'Play at icebreakerbingo.com';
+            cta.style.cssText = `
+                font-family: Fredoka, Inter, system-ui, sans-serif;
+                font-size: 14px; font-weight: 600; color: #94a3b8;
+                text-align: center; padding-top: 2px;
+            `;
+            wrapper.appendChild(cta);
+
+            document.body.appendChild(wrapper);
+
+            try {
+                const canvas = await html2canvas(wrapper, {
+                    backgroundColor: '#0b1628',
+                    scale: 2,
+                    useCORS: true,
+                    logging: false
+                });
+                document.body.removeChild(wrapper);
+                return await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+            } catch (err) {
+                if (document.body.contains(wrapper)) document.body.removeChild(wrapper);
+                console.error('Image generation failed:', err);
+                return null;
+            }
+        }
+
+        async function shareBoard() {
+            // Brief loading state on share buttons
+            const shareBtns = document.querySelectorAll('#shareBtn, #overlayShareBtn');
+            shareBtns.forEach(btn => { btn.disabled = true; btn.style.opacity = '0.6'; });
+
+            // Detect mobile: use native share API which handles files well
+            const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+            const blob = await generateBoardImage();
+            shareBtns.forEach(btn => { btn.disabled = false; btn.style.opacity = ''; });
+            if (!blob) {
+                showToast('\u26A0\uFE0F', 'Could not generate image');
+                return;
+            }
+
+            currentImageBlob = blob;
+
+            if (isMobile && navigator.canShare) {
+                // Mobile: try native file sharing first
+                try {
+                    const file = new File([blob], 'icebreaker-bingo.png', { type: 'image/png' });
+                    if (navigator.canShare({ files: [file] })) {
+                        await navigator.share({
+                            files: [file],
+                            title: 'Icebreaker Bingo',
+                            text: SHARE_TEXT
+                        });
+                        return;
+                    }
+                } catch (err) {
+                    if (err.name === 'AbortError') return;
+                    // Fall through to share panel on failure
+                }
+            }
+
+            // Desktop (or mobile fallback): copy to clipboard + show share panel
+            const copied = await copyImageToClipboard(blob);
+            const hint = document.getElementById('sharePanelHint');
+            if (copied) {
+                hint.innerHTML = '<span class="hint-icon">&#10003;</span> Image copied to clipboard &mdash; paste it in your post!';
+            } else {
+                hint.textContent = 'Use the buttons below to share or download your board.';
+            }
+            openSharePanel();
+        }
+
+        // Platform share handlers
+        function openPlatformShare(platform) {
+            const encodedText = encodeURIComponent(SHARE_TEXT);
+            const encodedUrl = encodeURIComponent(SHARE_URL);
+
+            const urls = {
+                x: `https://x.com/intent/post?text=${encodedText}&url=${encodedUrl}`,
+                facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}&quote=${encodedText}`,
+                whatsapp: `https://wa.me/?text=${encodedText}%20${encodedUrl}`,
+                email: `mailto:?subject=${encodeURIComponent('Icebreaker Bingo')}&body=${encodedText}%0A%0A${encodedUrl}`
+            };
+
+            const url = urls[platform];
+            if (url) {
+                if (platform === 'email') {
+                    window.location.href = url;
+                } else {
+                    window.open(url, '_blank', 'width=600,height=500,noopener,noreferrer');
+                }
+            }
+        }
+
+        // Share panel event listeners
+        document.getElementById('sharePanelClose').addEventListener('click', closeSharePanel);
+
+        document.getElementById('shareOverlay').addEventListener('click', (e) => {
+            if (e.target.id === 'shareOverlay') closeSharePanel();
+        });
+
+        document.querySelectorAll('.platform-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                openPlatformShare(btn.dataset.platform);
+            });
+        });
+
+        document.getElementById('shareCopyBtn').addEventListener('click', async () => {
+            if (!currentImageBlob) return;
+            const copied = await copyImageToClipboard(currentImageBlob);
+            if (copied) {
+                showToast('\u2705', 'Image copied to clipboard!');
+            } else {
+                showToast('\u26A0\uFE0F', 'Copy failed — try downloading instead');
+            }
+        });
+
+        document.getElementById('shareDownloadBtn').addEventListener('click', () => {
+            if (!currentImageBlob) return;
+            downloadImage(currentImageBlob);
+            showToast('\u2B07\uFE0F', 'Image downloaded!');
+        });
+
+        // Focus trap inside share panel (WCAG 2.4.3)
+        document.getElementById('shareOverlay').addEventListener('keydown', (e) => {
+            if (e.key !== 'Tab') return;
+            const panel = document.querySelector('.share-panel');
+            const focusable = panel.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+            if (focusable.length === 0) return;
+
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+
+            if (e.shiftKey) {
+                if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+            } else {
+                if (document.activeElement === last) { e.preventDefault(); first.focus(); }
             }
         });
 
