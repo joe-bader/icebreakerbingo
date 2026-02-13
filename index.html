@@ -628,8 +628,14 @@
         .overlay-actions {
             display: flex;
             gap: 12px;
-            align-items: center;
+            align-items: stretch;
             justify-content: center;
+            width: 100%;
+        }
+
+        .overlay-actions button {
+            flex: 1;
+            min-width: 0;
         }
 
         .overlay-share-btn {
@@ -1299,7 +1305,7 @@
         <div class="overlay-card">
             <div class="trophy" role="img" aria-hidden="true">&#127881;</div>
             <h2 id="overlayTitle">Bingo!</h2>
-            <p id="overlayDesc">You broke the ice! Keep going for more bingos!</p>
+            <p id="overlayDesc">You broke the ice! Spread the fun — share your board.</p>
             <div class="overlay-actions">
                 <button id="newBoardBtn">Keep Playing</button>
                 <button class="share-btn overlay-share-btn" id="overlayShareBtn" aria-label="Share board image">
