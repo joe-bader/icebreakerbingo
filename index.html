@@ -63,11 +63,13 @@
     <style>
         :root {
             /* Arctic palette */
-            --bg-deep: #0b1628;
-            --bg-mid: #0f1f3d;
-            --aurora-cyan: rgba(56, 189, 248, 0.15);
-            --aurora-purple: rgba(139, 92, 246, 0.12);
-            --aurora-teal: rgba(45, 212, 191, 0.08);
+            --bg-deep: #091832;
+            --bg-mid: #0d2348;
+            --aurora-cyan: rgba(56, 189, 248, 0.22);
+            --aurora-purple: rgba(139, 92, 246, 0.18);
+            --aurora-teal: rgba(45, 212, 191, 0.12);
+            --aurora-accent1: rgba(56, 189, 248, 0.10);
+            --aurora-accent2: rgba(139, 92, 246, 0.10);
 
             /* Ice tile colors */
             --ice-light: #d4e6f6;
@@ -76,12 +78,37 @@
             --ice-border: rgba(255, 255, 255, 0.45);
             --ice-text: #152540;
 
-            /* Cracked ice — aurora glow beneath */
+            /* Tile gradient */
+            --tile-from: #dae9f6;
+            --tile-mid: #bdd4e8;
+            --tile-to: #a8c4dc;
+
+            /* Checked state */
+            --checked-from: #14b8a6;
+            --checked-mid: #8b5cf6;
+            --checked-to: #6d28d9;
+            --checked-span-from: #0f766e;
+            --checked-span-to: #5b21b6;
+            --checked-edge: #134e4a;
             --cracked-glow: rgba(45, 212, 191, 0.4);
 
-            /* Gold center cell */
+            /* Center cell */
+            --center-from: #fbbf24;
+            --center-mid: #d97706;
+            --center-to: #b45309;
+            --center-edge: #92400e;
+            --center-glow: rgba(251, 191, 36, 0.35);
+
+            /* Gold (legacy alias) */
             --gold: #d97706;
             --gold-glow: rgba(251, 191, 36, 0.35);
+
+            /* Title glow */
+            --title-glow: rgba(56, 189, 248, 0.28);
+            --title-glow-wide: rgba(56, 189, 248, 0.10);
+
+            /* Board frame glow */
+            --frame-glow: rgba(56, 189, 248, 0.06);
 
             /* UI surfaces */
             --frost-surface: rgba(255, 255, 255, 0.07);
@@ -89,6 +116,7 @@
             --text-light: #e2e8f0;
             --text-bright: #ffffff;
             --text-dim: #94a3b8;
+            --text-muted: #64748b;
             --focus-ring: #38bdf8;
 
             /* Shared */
@@ -99,6 +127,146 @@
             --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             --content-max: 560px;
             --sidebar-width: 300px;
+        }
+
+        /* ─── Work Theme: Slate/charcoal + amber accents ─── */
+        body[data-visual-theme="work"] {
+            --bg-deep: #141428;
+            --bg-mid: #1c1c3a;
+            --aurora-cyan: rgba(251, 191, 36, 0.20);
+            --aurora-purple: rgba(168, 162, 200, 0.16);
+            --aurora-teal: rgba(251, 146, 60, 0.14);
+            --aurora-accent1: rgba(251, 191, 36, 0.10);
+            --aurora-accent2: rgba(168, 162, 200, 0.08);
+            --ice-light: #e2e4ea;
+            --ice-mid: #c8cbd4;
+            --ice-edge: #8891a0;
+            --ice-border: rgba(255, 255, 255, 0.35);
+            --ice-text: #1e293b;
+            --tile-from: #e2e4ea;
+            --tile-mid: #cdd1da;
+            --tile-to: #b8bdc8;
+            --checked-from: #f59e0b;
+            --checked-mid: #3b82f6;
+            --checked-to: #1e3a8a;
+            --checked-span-from: #b45309;
+            --checked-span-to: #1e40af;
+            --checked-edge: #78350f;
+            --cracked-glow: rgba(251, 191, 36, 0.35);
+            --center-from: #f59e0b;
+            --center-mid: #d97706;
+            --center-to: #92400e;
+            --center-edge: #78350f;
+            --center-glow: rgba(245, 158, 11, 0.35);
+            --title-glow: rgba(251, 191, 36, 0.28);
+            --title-glow-wide: rgba(251, 191, 36, 0.10);
+            --frame-glow: rgba(251, 191, 36, 0.06);
+            --focus-ring: #f59e0b;
+        }
+
+        /* ─── Friends Theme: Vibrant purple/magenta ─── */
+        body[data-visual-theme="friends"] {
+            --bg-deep: #1e0838;
+            --bg-mid: #2c0e52;
+            --aurora-cyan: rgba(217, 70, 239, 0.24);
+            --aurora-purple: rgba(139, 92, 246, 0.22);
+            --aurora-teal: rgba(236, 72, 153, 0.16);
+            --aurora-accent1: rgba(217, 70, 239, 0.12);
+            --aurora-accent2: rgba(6, 182, 212, 0.10);
+            --ice-light: #ede5f7;
+            --ice-mid: #d8c8f0;
+            --ice-edge: #a78bda;
+            --ice-border: rgba(255, 255, 255, 0.40);
+            --ice-text: #1e1040;
+            --tile-from: #ede5f7;
+            --tile-mid: #ddd0f2;
+            --tile-to: #ccb8ec;
+            --checked-from: #d946ef;
+            --checked-mid: #06b6d4;
+            --checked-to: #0e7490;
+            --checked-span-from: #a21caf;
+            --checked-span-to: #0891b2;
+            --checked-edge: #701a75;
+            --cracked-glow: rgba(217, 70, 239, 0.4);
+            --center-from: #f472b6;
+            --center-mid: #ec4899;
+            --center-to: #be185d;
+            --center-edge: #9d174d;
+            --center-glow: rgba(236, 72, 153, 0.4);
+            --title-glow: rgba(217, 70, 239, 0.28);
+            --title-glow-wide: rgba(217, 70, 239, 0.10);
+            --frame-glow: rgba(217, 70, 239, 0.06);
+            --focus-ring: #d946ef;
+        }
+
+        /* ─── Family Theme: Cheerful primary colors ─── */
+        body[data-visual-theme="family"] {
+            --bg-deep: #0a1838;
+            --bg-mid: #10224e;
+            --aurora-cyan: rgba(59, 130, 246, 0.24);
+            --aurora-purple: rgba(251, 191, 36, 0.20);
+            --aurora-teal: rgba(34, 197, 94, 0.14);
+            --aurora-accent1: rgba(59, 130, 246, 0.12);
+            --aurora-accent2: rgba(251, 191, 36, 0.10);
+            --ice-light: #e0ecf8;
+            --ice-mid: #c8d9ee;
+            --ice-edge: #7da3cc;
+            --ice-border: rgba(255, 255, 255, 0.40);
+            --ice-text: #1a2744;
+            --tile-from: #e4edf8;
+            --tile-mid: #d2e0f0;
+            --tile-to: #bdd0e6;
+            --checked-from: #3b82f6;
+            --checked-mid: #eab308;
+            --checked-to: #16a34a;
+            --checked-span-from: #1d4ed8;
+            --checked-span-to: #15803d;
+            --checked-edge: #1e3a5f;
+            --cracked-glow: rgba(59, 130, 246, 0.35);
+            --center-from: #fbbf24;
+            --center-mid: #eab308;
+            --center-to: #a16207;
+            --center-edge: #854d0e;
+            --center-glow: rgba(234, 179, 8, 0.4);
+            --title-glow: rgba(59, 130, 246, 0.28);
+            --title-glow-wide: rgba(59, 130, 246, 0.10);
+            --frame-glow: rgba(59, 130, 246, 0.06);
+            --focus-ring: #3b82f6;
+        }
+
+        /* ─── First Date Theme: Soft rose/blush ─── */
+        body[data-visual-theme="dating"] {
+            --bg-deep: #30082a;
+            --bg-mid: #461040;
+            --aurora-cyan: rgba(244, 114, 182, 0.24);
+            --aurora-purple: rgba(232, 121, 249, 0.18);
+            --aurora-teal: rgba(251, 191, 36, 0.12);
+            --aurora-accent1: rgba(244, 114, 182, 0.12);
+            --aurora-accent2: rgba(232, 121, 249, 0.10);
+            --ice-light: #f5e0ea;
+            --ice-mid: #eacbd8;
+            --ice-edge: #c48da6;
+            --ice-border: rgba(255, 255, 255, 0.38);
+            --ice-text: #3b0820;
+            --tile-from: #f5e0ea;
+            --tile-mid: #eed2e0;
+            --tile-to: #e4bfd2;
+            --checked-from: #f472b6;
+            --checked-mid: #c084fc;
+            --checked-to: #7c3aed;
+            --checked-span-from: #db2777;
+            --checked-span-to: #6d28d9;
+            --checked-edge: #9d174d;
+            --cracked-glow: rgba(244, 114, 182, 0.4);
+            --center-from: #fda4af;
+            --center-mid: #f472b6;
+            --center-to: #db2777;
+            --center-edge: #9d174d;
+            --center-glow: rgba(244, 114, 182, 0.4);
+            --title-glow: rgba(244, 114, 182, 0.28);
+            --title-glow-wide: rgba(244, 114, 182, 0.10);
+            --frame-glow: rgba(244, 114, 182, 0.06);
+            --focus-ring: #f472b6;
         }
 
         * {
@@ -115,8 +283,8 @@
                 radial-gradient(ellipse at 30% 10%, var(--aurora-cyan) 0%, transparent 50%),
                 radial-gradient(ellipse at 70% 20%, var(--aurora-purple) 0%, transparent 50%),
                 radial-gradient(ellipse at 50% 80%, var(--aurora-teal) 0%, transparent 50%),
-                radial-gradient(ellipse at 15% 90%, rgba(56, 189, 248, 0.06) 0%, transparent 40%),
-                radial-gradient(ellipse at 85% 60%, rgba(139, 92, 246, 0.06) 0%, transparent 40%);
+                radial-gradient(ellipse at 15% 90%, var(--aurora-accent1) 0%, transparent 40%),
+                radial-gradient(ellipse at 85% 60%, var(--aurora-accent2) 0%, transparent 40%);
             color: var(--text-light);
             display: flex;
             flex-direction: column;
@@ -394,39 +562,7 @@
             filter: blur(0px);
         }
 
-        /* ── Layer 1: Large foreground flakes (bright, slow) ── */
-        .snowflake:nth-child(1)  { left: 3%;  font-size: 1.8rem; color: rgba(255,255,255,0.35); animation-duration: 14s, 4s;  animation-delay: 0s, 0s; }
-        .snowflake:nth-child(2)  { left: 22%; font-size: 1.6rem; color: rgba(200,230,255,0.30); animation-duration: 16s, 5s;  animation-delay: 2s, 1s; }
-        .snowflake:nth-child(3)  { left: 48%; font-size: 2.0rem; color: rgba(255,255,255,0.28); animation-duration: 13s, 3.5s; animation-delay: 5s, 0.5s; }
-        .snowflake:nth-child(4)  { left: 70%; font-size: 1.7rem; color: rgba(200,230,255,0.32); animation-duration: 15s, 4.5s; animation-delay: 1s, 2s; }
-        .snowflake:nth-child(5)  { left: 90%; font-size: 1.5rem; color: rgba(255,255,255,0.30); animation-duration: 17s, 5.5s; animation-delay: 8s, 0s; }
-
-        /* ── Layer 2: Medium mid-ground flakes ── */
-        .snowflake:nth-child(6)  { left: 8%;  font-size: 1.1rem; color: rgba(255,255,255,0.25); animation-duration: 20s, 5s;  animation-delay: 3s, 1.5s; }
-        .snowflake:nth-child(7)  { left: 18%; font-size: 1.3rem; color: rgba(186,220,248,0.22); animation-duration: 18s, 6s;  animation-delay: 0s, 3s; }
-        .snowflake:nth-child(8)  { left: 32%; font-size: 1.0rem; color: rgba(255,255,255,0.20); animation-duration: 22s, 4.5s; animation-delay: 6s, 0s; }
-        .snowflake:nth-child(9)  { left: 45%; font-size: 1.2rem; color: rgba(200,230,255,0.24); animation-duration: 19s, 5.5s; animation-delay: 10s, 2s; }
-        .snowflake:nth-child(10) { left: 58%; font-size: 1.1rem; color: rgba(255,255,255,0.22); animation-duration: 21s, 6.5s; animation-delay: 4s, 1s; }
-        .snowflake:nth-child(11) { left: 72%; font-size: 1.4rem; color: rgba(186,220,248,0.26); animation-duration: 17s, 4s;  animation-delay: 7s, 0.5s; }
-        .snowflake:nth-child(12) { left: 83%; font-size: 1.0rem; color: rgba(255,255,255,0.20); animation-duration: 23s, 5s;  animation-delay: 1s, 2.5s; }
-        .snowflake:nth-child(13) { left: 95%; font-size: 1.3rem; color: rgba(200,230,255,0.23); animation-duration: 20s, 5.5s; animation-delay: 9s, 0s; }
-
-        /* ── Layer 3: Small background flakes (faint, fast, blurred) ── */
-        .snowflake:nth-child(14) { left: 6%;  font-size: 0.6rem; color: rgba(255,255,255,0.14); animation-duration: 12s, 3s;  animation-delay: 2s, 0s;  filter: blur(1px); }
-        .snowflake:nth-child(15) { left: 14%; font-size: 0.5rem; color: rgba(255,255,255,0.12); animation-duration: 10s, 3.5s; animation-delay: 0s, 1s;  filter: blur(1px); }
-        .snowflake:nth-child(16) { left: 25%; font-size: 0.7rem; color: rgba(200,230,255,0.16); animation-duration: 11s, 2.5s; animation-delay: 4s, 0.5s; filter: blur(1px); }
-        .snowflake:nth-child(17) { left: 38%; font-size: 0.5rem; color: rgba(255,255,255,0.13); animation-duration: 13s, 4s;  animation-delay: 6s, 2s;  filter: blur(1.5px); }
-        .snowflake:nth-child(18) { left: 52%; font-size: 0.6rem; color: rgba(255,255,255,0.15); animation-duration: 9s,  3s;  animation-delay: 1s, 0s;  filter: blur(1px); }
-        .snowflake:nth-child(19) { left: 63%; font-size: 0.7rem; color: rgba(200,230,255,0.14); animation-duration: 12s, 3.5s; animation-delay: 8s, 1.5s; filter: blur(1px); }
-        .snowflake:nth-child(20) { left: 76%; font-size: 0.5rem; color: rgba(255,255,255,0.12); animation-duration: 10s, 2.5s; animation-delay: 3s, 0s;  filter: blur(1.5px); }
-        .snowflake:nth-child(21) { left: 85%; font-size: 0.6rem; color: rgba(255,255,255,0.16); animation-duration: 11s, 4s;  animation-delay: 5s, 1s;  filter: blur(1px); }
-        .snowflake:nth-child(22) { left: 96%; font-size: 0.5rem; color: rgba(200,230,255,0.13); animation-duration: 14s, 3s;  animation-delay: 7s, 2.5s; filter: blur(1px); }
-
-        /* ── Layer 4: Twinkling sparkle flakes ── */
-        .snowflake:nth-child(23) { left: 10%; font-size: 0.9rem; color: rgba(56,189,248,0.20);  animation: snowfall linear infinite, snowsway ease-in-out infinite, sparkle 2s ease-in-out infinite; animation-duration: 16s, 5s, 2s; animation-delay: 0s, 0.5s, 0s; }
-        .snowflake:nth-child(24) { left: 40%; font-size: 0.8rem; color: rgba(139,92,246,0.18);   animation: snowfall linear infinite, snowsway ease-in-out infinite, sparkle 2.5s ease-in-out infinite; animation-duration: 19s, 4s, 2.5s; animation-delay: 3s, 1s, 0.5s; }
-        .snowflake:nth-child(25) { left: 65%; font-size: 1.0rem; color: rgba(56,189,248,0.22);  animation: snowfall linear infinite, snowsway ease-in-out infinite, sparkle 1.8s ease-in-out infinite; animation-duration: 14s, 5.5s, 1.8s; animation-delay: 6s, 0s, 1s; }
-        .snowflake:nth-child(26) { left: 88%; font-size: 0.7rem; color: rgba(167,139,250,0.18); animation: snowfall linear infinite, snowsway ease-in-out infinite, sparkle 2.2s ease-in-out infinite; animation-duration: 21s, 4.5s, 2.2s; animation-delay: 9s, 2s, 0s; }
+        /* nth-child styles removed — particles are built dynamically by JS */
 
         @keyframes snowfall {
             0%   { transform: translateY(-5vh) rotate(0deg);   opacity: 0; }
@@ -527,9 +663,9 @@
             color: var(--text-bright);
             line-height: 1.1;
             text-shadow:
-                0 0 30px rgba(56, 189, 248, 0.45),
-                0 0 60px rgba(56, 189, 248, 0.2),
-                0 2px 0 rgba(0, 0, 0, 0.15);
+                0 0 16px var(--title-glow),
+                0 0 40px var(--title-glow-wide),
+                0 2px 0 rgba(0, 0, 0, 0.25);
             letter-spacing: -0.01em;
         }
 
@@ -814,7 +950,7 @@
             border-radius: var(--radius-xl);
             padding: 14px;
             box-shadow:
-                0 0 60px rgba(56, 189, 248, 0.06),
+                0 0 60px var(--frame-glow),
                 inset 0 1px 1px rgba(255, 255, 255, 0.04);
             width: 100%;
             overflow: hidden;
@@ -831,7 +967,7 @@
         /* ─── Ice Tile Cells ─── */
         .grid-cell {
             aspect-ratio: 1;
-            background: linear-gradient(155deg, #dae9f6 0%, #bdd4e8 60%, #a8c4dc 100%);
+            background: linear-gradient(155deg, var(--tile-from) 0%, var(--tile-mid) 60%, var(--tile-to) 100%);
             border: 1px solid var(--ice-border);
             border-radius: var(--radius-md);
             display: flex;
@@ -906,15 +1042,15 @@
         /* ── Checked = Cracked ice revealing aurora beneath ── */
         .grid-cell:has(input:checked) {
             box-shadow:
-                0 4px 0 #134e4a,
+                0 4px 0 var(--checked-edge),
                 0 6px 14px rgba(0, 0, 0, 0.3),
                 0 0 22px var(--cracked-glow),
                 inset 0 2px 3px rgba(255, 255, 255, 0.15);
-            background: linear-gradient(155deg, #14b8a6 0%, #8b5cf6 50%, #6d28d9 100%);
+            background: linear-gradient(155deg, var(--checked-from) 0%, var(--checked-mid) 50%, var(--checked-to) 100%);
         }
 
         .grid-cell input:checked + span {
-            background: linear-gradient(135deg, #0f766e 0%, #5b21b6 100%);
+            background: linear-gradient(135deg, var(--checked-span-from) 0%, var(--checked-span-to) 100%);
             color: var(--text-bright);
             font-weight: 700;
             animation: iceBreak 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -984,13 +1120,13 @@
 
         /* ── Gold Star Center Cell ── */
         .center-cell {
-            background: linear-gradient(155deg, #fbbf24 0%, #d97706 40%, #b45309 100%) !important;
+            background: linear-gradient(155deg, var(--center-from) 0%, var(--center-mid) 40%, var(--center-to) 100%) !important;
             border: 1px solid rgba(255, 255, 255, 0.35) !important;
             color: var(--text-bright);
             box-shadow:
-                0 4px 0 #92400e,
+                0 4px 0 var(--center-edge),
                 0 6px 14px rgba(0, 0, 0, 0.3),
-                0 0 28px rgba(251, 191, 36, 0.35),
+                0 0 28px var(--center-glow),
                 inset 0 2px 4px rgba(255, 255, 255, 0.35) !important;
             animation: goldPulse 3s ease-in-out infinite;
         }
@@ -998,9 +1134,9 @@
         .center-cell:hover {
             transform: translateY(-3px);
             box-shadow:
-                0 7px 0 #92400e,
+                0 7px 0 var(--center-edge),
                 0 10px 24px rgba(0, 0, 0, 0.35),
-                0 0 40px rgba(251, 191, 36, 0.45),
+                0 0 40px var(--center-glow),
                 inset 0 2px 4px rgba(255, 255, 255, 0.35) !important;
         }
 
@@ -1009,7 +1145,7 @@
             width: 55%;
             height: 55%;
             position: relative;
-            filter: drop-shadow(0 3px 4px rgba(120, 53, 15, 0.5));
+            /* filter set inline by JS per theme */
         }
 
         /* Base star shape — golden gradient with metallic sheen */
@@ -1356,38 +1492,7 @@
     <a href="#bingo-game" class="skip-link">Skip to game board</a>
 
     <!-- Decorative floating snowflakes -->
-    <div class="snowflakes" aria-hidden="true">
-        <!-- Layer 1: Large foreground -->
-        <div class="snowflake">&#10052;</div>
-        <div class="snowflake">&#10053;</div>
-        <div class="snowflake">&#10054;</div>
-        <div class="snowflake">&#10052;</div>
-        <div class="snowflake">&#10053;</div>
-        <!-- Layer 2: Medium mid-ground -->
-        <div class="snowflake">&#10054;</div>
-        <div class="snowflake">&#10052;</div>
-        <div class="snowflake">&#10053;</div>
-        <div class="snowflake">&#10054;</div>
-        <div class="snowflake">&#10052;</div>
-        <div class="snowflake">&#10053;</div>
-        <div class="snowflake">&#10054;</div>
-        <div class="snowflake">&#10052;</div>
-        <!-- Layer 3: Small background -->
-        <div class="snowflake">&#10053;</div>
-        <div class="snowflake">&#10054;</div>
-        <div class="snowflake">&#10052;</div>
-        <div class="snowflake">&#10053;</div>
-        <div class="snowflake">&#10054;</div>
-        <div class="snowflake">&#10052;</div>
-        <div class="snowflake">&#10053;</div>
-        <div class="snowflake">&#10054;</div>
-        <div class="snowflake">&#10052;</div>
-        <!-- Layer 4: Twinkling sparkles -->
-        <div class="snowflake">&#10040;</div>
-        <div class="snowflake">&#9733;</div>
-        <div class="snowflake">&#10040;</div>
-        <div class="snowflake">&#9733;</div>
-    </div>
+    <div class="snowflakes" id="particleContainer" aria-hidden="true"></div>
 
     <!-- Top Leaderboard Ad -->
     <div class="ad-leaderboard" role="complementary" aria-label="Advertisement">
@@ -1877,6 +1982,132 @@
             soundEnabled = false;
         }
 
+        // ─── Visual Theme Config ───
+        const visualThemes = {
+            classic: {
+                symbols: ['\u2744', '\u2745', '\u2746', '\u2744', '\u2745', '\u2746', '\u2744', '\u2745', '\u2746', '\u2744', '\u2745', '\u2746', '\u2744', '\u2745', '\u2746', '\u2744', '\u2745', '\u2746', '\u2744', '\u2745', '\u2746', '\u2744', '\u2728', '\u2B50', '\u2728', '\u2B50'],
+                colors: [
+                    ['rgba(255,255,255,0.35)','rgba(200,230,255,0.30)','rgba(255,255,255,0.28)','rgba(200,230,255,0.32)','rgba(255,255,255,0.30)'],
+                    ['rgba(255,255,255,0.25)','rgba(186,220,248,0.22)','rgba(255,255,255,0.20)','rgba(200,230,255,0.24)','rgba(255,255,255,0.22)','rgba(186,220,248,0.26)','rgba(255,255,255,0.20)','rgba(200,230,255,0.23)'],
+                    ['rgba(255,255,255,0.14)','rgba(255,255,255,0.12)','rgba(200,230,255,0.16)','rgba(255,255,255,0.13)','rgba(255,255,255,0.15)','rgba(200,230,255,0.14)','rgba(255,255,255,0.12)','rgba(255,255,255,0.16)','rgba(200,230,255,0.13)'],
+                    ['rgba(56,189,248,0.20)','rgba(139,92,246,0.18)','rgba(56,189,248,0.22)','rgba(167,139,250,0.18)']
+                ],
+                starGrad: ['#fde68a','#f59e0b','#b45309'],
+                starDrop: 'rgba(120,53,15,0.5)'
+            },
+            work: {
+                symbols: ['\u25C6', '\u25A0', '\u25CF', '\u25B2', '\u25C7', '\u25C6', '\u25A0', '\u25CF', '\u25B2', '\u25C7', '\u25C6', '\u25A0', '\u25CF', '\u25C7', '\u25A0', '\u25CF', '\u25B2', '\u25C6', '\u25C7', '\u25A0', '\u25CF', '\u25B2', '\u2726', '\u2605', '\u2726', '\u2605'],
+                colors: [
+                    ['rgba(251,191,36,0.30)','rgba(148,163,184,0.25)','rgba(251,146,60,0.28)','rgba(148,163,184,0.30)','rgba(251,191,36,0.25)'],
+                    ['rgba(251,191,36,0.20)','rgba(148,163,184,0.18)','rgba(251,146,60,0.16)','rgba(148,163,184,0.20)','rgba(251,191,36,0.18)','rgba(148,163,184,0.22)','rgba(251,146,60,0.16)','rgba(148,163,184,0.18)'],
+                    ['rgba(251,191,36,0.12)','rgba(148,163,184,0.10)','rgba(251,146,60,0.12)','rgba(148,163,184,0.11)','rgba(251,191,36,0.10)','rgba(148,163,184,0.12)','rgba(251,146,60,0.10)','rgba(251,191,36,0.12)','rgba(148,163,184,0.10)'],
+                    ['rgba(251,191,36,0.20)','rgba(251,146,60,0.18)','rgba(251,191,36,0.22)','rgba(148,163,184,0.18)']
+                ],
+                starGrad: ['#fde68a','#f59e0b','#92400e'],
+                starDrop: 'rgba(120,53,15,0.5)'
+            },
+            friends: {
+                symbols: ['\u2605', '\u266A', '\u2726', '\u2736', '\u2605', '\u266A', '\u2726', '\u2736', '\u2605', '\u266A', '\u2726', '\u2736', '\u2605', '\u266A', '\u2726', '\u2736', '\u2605', '\u266A', '\u2726', '\u2736', '\u2605', '\u266A', '\u2728', '\u2B50', '\u2728', '\u2B50'],
+                colors: [
+                    ['rgba(217,70,239,0.32)','rgba(139,92,246,0.28)','rgba(236,72,153,0.30)','rgba(6,182,212,0.28)','rgba(217,70,239,0.30)'],
+                    ['rgba(217,70,239,0.22)','rgba(139,92,246,0.20)','rgba(236,72,153,0.18)','rgba(6,182,212,0.20)','rgba(217,70,239,0.18)','rgba(139,92,246,0.22)','rgba(236,72,153,0.20)','rgba(6,182,212,0.18)'],
+                    ['rgba(217,70,239,0.12)','rgba(139,92,246,0.10)','rgba(236,72,153,0.12)','rgba(6,182,212,0.11)','rgba(217,70,239,0.10)','rgba(139,92,246,0.12)','rgba(236,72,153,0.10)','rgba(217,70,239,0.12)','rgba(6,182,212,0.10)'],
+                    ['rgba(217,70,239,0.22)','rgba(236,72,153,0.20)','rgba(6,182,212,0.22)','rgba(139,92,246,0.20)']
+                ],
+                starGrad: ['#f9a8d4','#ec4899','#be185d'],
+                starDrop: 'rgba(157,23,77,0.5)'
+            },
+            family: {
+                symbols: ['\u2665', '\u2605', '\u263A', '\u2665', '\u2605', '\u2665', '\u263A', '\u2605', '\u2665', '\u2605', '\u2665', '\u263A', '\u2605', '\u2665', '\u2605', '\u263A', '\u2665', '\u2605', '\u2665', '\u263A', '\u2605', '\u2665', '\u2728', '\u2B50', '\u2728', '\u2B50'],
+                colors: [
+                    ['rgba(59,130,246,0.32)','rgba(234,179,8,0.30)','rgba(34,197,94,0.28)','rgba(59,130,246,0.30)','rgba(234,179,8,0.28)'],
+                    ['rgba(59,130,246,0.22)','rgba(234,179,8,0.20)','rgba(34,197,94,0.18)','rgba(59,130,246,0.20)','rgba(234,179,8,0.18)','rgba(34,197,94,0.22)','rgba(59,130,246,0.20)','rgba(234,179,8,0.18)'],
+                    ['rgba(59,130,246,0.12)','rgba(234,179,8,0.10)','rgba(34,197,94,0.12)','rgba(59,130,246,0.11)','rgba(234,179,8,0.10)','rgba(34,197,94,0.12)','rgba(59,130,246,0.10)','rgba(234,179,8,0.12)','rgba(34,197,94,0.10)'],
+                    ['rgba(59,130,246,0.22)','rgba(234,179,8,0.20)','rgba(34,197,94,0.22)','rgba(59,130,246,0.20)']
+                ],
+                starGrad: ['#fde68a','#eab308','#a16207'],
+                starDrop: 'rgba(133,77,14,0.5)'
+            },
+            dating: {
+                symbols: ['\u2661', '\u2728', '\u2605', '\u2661', '\u2728', '\u2661', '\u2728', '\u2605', '\u2661', '\u2728', '\u2661', '\u2605', '\u2728', '\u2661', '\u2728', '\u2605', '\u2661', '\u2728', '\u2661', '\u2605', '\u2728', '\u2661', '\u2728', '\u2B50', '\u2728', '\u2B50'],
+                colors: [
+                    ['rgba(244,114,182,0.32)','rgba(232,121,249,0.28)','rgba(251,191,36,0.25)','rgba(244,114,182,0.30)','rgba(232,121,249,0.28)'],
+                    ['rgba(244,114,182,0.22)','rgba(232,121,249,0.20)','rgba(251,191,36,0.16)','rgba(244,114,182,0.20)','rgba(232,121,249,0.18)','rgba(244,114,182,0.22)','rgba(251,191,36,0.16)','rgba(232,121,249,0.18)'],
+                    ['rgba(244,114,182,0.12)','rgba(232,121,249,0.10)','rgba(251,191,36,0.10)','rgba(244,114,182,0.11)','rgba(232,121,249,0.10)','rgba(244,114,182,0.12)','rgba(251,191,36,0.10)','rgba(244,114,182,0.12)','rgba(232,121,249,0.10)'],
+                    ['rgba(244,114,182,0.22)','rgba(232,121,249,0.20)','rgba(251,191,36,0.18)','rgba(244,114,182,0.20)']
+                ],
+                starGrad: ['#fecdd3','#f472b6','#db2777'],
+                starDrop: 'rgba(157,23,77,0.5)'
+            }
+        };
+
+        // Particle layer layout (matches the original snowflake structure)
+        const particleLayout = [
+            // Layer 1: large foreground (5)
+            { left: '3%',  size: '1.8rem', fall: 14, sway: 4,  delay: 0,  swayD: 0 },
+            { left: '22%', size: '1.6rem', fall: 16, sway: 5,  delay: 2,  swayD: 1 },
+            { left: '48%', size: '2.0rem', fall: 13, sway: 3.5,delay: 5,  swayD: 0.5 },
+            { left: '70%', size: '1.7rem', fall: 15, sway: 4.5,delay: 1,  swayD: 2 },
+            { left: '90%', size: '1.5rem', fall: 17, sway: 5.5,delay: 8,  swayD: 0 },
+            // Layer 2: medium mid-ground (8)
+            { left: '8%',  size: '1.1rem', fall: 20, sway: 5,  delay: 3,  swayD: 1.5 },
+            { left: '18%', size: '1.3rem', fall: 18, sway: 6,  delay: 0,  swayD: 3 },
+            { left: '32%', size: '1.0rem', fall: 22, sway: 4.5,delay: 6,  swayD: 0 },
+            { left: '45%', size: '1.2rem', fall: 19, sway: 5.5,delay: 10, swayD: 2 },
+            { left: '58%', size: '1.1rem', fall: 21, sway: 6.5,delay: 4,  swayD: 1 },
+            { left: '72%', size: '1.4rem', fall: 17, sway: 4,  delay: 7,  swayD: 0.5 },
+            { left: '83%', size: '1.0rem', fall: 23, sway: 5,  delay: 1,  swayD: 2.5 },
+            { left: '95%', size: '1.3rem', fall: 20, sway: 5.5,delay: 9,  swayD: 0 },
+            // Layer 3: small background (9)
+            { left: '6%',  size: '0.6rem', fall: 12, sway: 3,  delay: 2,  swayD: 0,   blur: 1 },
+            { left: '14%', size: '0.5rem', fall: 10, sway: 3.5,delay: 0,  swayD: 1,   blur: 1 },
+            { left: '25%', size: '0.7rem', fall: 11, sway: 2.5,delay: 4,  swayD: 0.5, blur: 1 },
+            { left: '38%', size: '0.5rem', fall: 13, sway: 4,  delay: 6,  swayD: 2,   blur: 1.5 },
+            { left: '52%', size: '0.6rem', fall: 9,  sway: 3,  delay: 1,  swayD: 0,   blur: 1 },
+            { left: '63%', size: '0.7rem', fall: 12, sway: 3.5,delay: 8,  swayD: 1.5, blur: 1 },
+            { left: '76%', size: '0.5rem', fall: 10, sway: 2.5,delay: 3,  swayD: 0,   blur: 1.5 },
+            { left: '85%', size: '0.6rem', fall: 11, sway: 4,  delay: 5,  swayD: 1,   blur: 1 },
+            { left: '96%', size: '0.5rem', fall: 14, sway: 3,  delay: 7,  swayD: 2.5, blur: 1 },
+            // Layer 4: sparkles (4)
+            { left: '10%', size: '0.9rem', fall: 16, sway: 5,  delay: 0,  swayD: 0.5, sparkle: 2 },
+            { left: '40%', size: '0.8rem', fall: 19, sway: 4,  delay: 3,  swayD: 1,   sparkle: 2.5 },
+            { left: '65%', size: '1.0rem', fall: 14, sway: 5.5,delay: 6,  swayD: 0,   sparkle: 1.8 },
+            { left: '88%', size: '0.7rem', fall: 21, sway: 4.5,delay: 9,  swayD: 2,   sparkle: 2.2 }
+        ];
+
+        function buildParticles(themeKey) {
+            const container = document.getElementById('particleContainer');
+            container.innerHTML = '';
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+            const cfg = visualThemes[themeKey] || visualThemes.classic;
+            const allColors = [...cfg.colors[0], ...cfg.colors[1], ...cfg.colors[2], ...cfg.colors[3]];
+
+            particleLayout.forEach((p, i) => {
+                const el = document.createElement('div');
+                el.className = 'snowflake';
+                el.textContent = cfg.symbols[i] || cfg.symbols[0];
+                el.style.left = p.left;
+                el.style.fontSize = p.size;
+                el.style.color = allColors[i] || allColors[0];
+                if (p.blur) el.style.filter = `blur(${p.blur}px)`;
+
+                if (p.sparkle) {
+                    el.style.animation = `snowfall ${p.fall}s linear infinite, snowsway ${p.sway}s ease-in-out infinite, sparkle ${p.sparkle}s ease-in-out infinite`;
+                    el.style.animationDelay = `${p.delay}s, ${p.swayD}s, 0s`;
+                } else {
+                    el.style.animationDuration = `${p.fall}s, ${p.sway}s`;
+                    el.style.animationDelay = `${p.delay}s, ${p.swayD}s`;
+                }
+                container.appendChild(el);
+            });
+        }
+
+        function applyVisualTheme(themeKey) {
+            document.body.dataset.visualTheme = themeKey;
+            buildParticles(themeKey);
+        }
+
         // ─── Theme Picker ───
         function buildThemePicker() {
             const picker = document.getElementById('themePicker');
@@ -1909,6 +2140,7 @@
             document.querySelector(`.theme-btn[data-theme="${key}"]`)?.classList.add('active');
             document.getElementById('dailyBtn')?.classList.remove('active');
             document.getElementById('resetBtn').disabled = false;
+            applyVisualTheme(key);
             resetBoard();
         }
 
@@ -1982,13 +2214,15 @@
 
                     if (row === 2 && col === 2) {
                         cell.classList.add('center-cell');
+                        const sg = (visualThemes[currentTheme] || visualThemes.classic).starGrad;
+                        const sd = (visualThemes[currentTheme] || visualThemes.classic).starDrop;
                         cell.innerHTML = `
-                            <svg class="star-3d" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <svg class="star-3d" viewBox="0 0 24 24" aria-hidden="true" focusable="false" style="filter: drop-shadow(0 3px 4px ${sd})">
                                 <defs>
                                     <linearGradient id="goldGradient" x1="0" y1="0" x2="1" y2="1">
-                                        <stop offset="0%" stop-color="#fde68a"/>
-                                        <stop offset="40%" stop-color="#f59e0b"/>
-                                        <stop offset="100%" stop-color="#b45309"/>
+                                        <stop offset="0%" stop-color="${sg[0]}"/>
+                                        <stop offset="40%" stop-color="${sg[1]}"/>
+                                        <stop offset="100%" stop-color="${sg[2]}"/>
                                     </linearGradient>
                                     <linearGradient id="goldHighlight" x1="0" y1="0" x2="0.5" y2="1">
                                         <stop offset="0%" stop-color="#ffffff"/>
@@ -2236,6 +2470,7 @@
                 currentSeed = parseInt(seed, 10);
                 if (theme && themes[theme]) {
                     currentTheme = theme;
+                    applyVisualTheme(theme);
                 }
                 isDailyMode = false;
                 localStorage.setItem('ib_daily', 'false');
@@ -2365,9 +2600,12 @@
             if (!boardEl || typeof html2canvas === 'undefined') return null;
 
             const wrapper = document.createElement('div');
+            const bgDeep = getComputedStyle(document.body).getPropertyValue('--bg-deep').trim();
+            const titleGlow = getComputedStyle(document.body).getPropertyValue('--title-glow').trim();
+
             wrapper.style.cssText = `
                 position: fixed; left: -9999px; top: 0;
-                background: #0b1628;
+                background: ${bgDeep};
                 padding: 32px 28px 24px;
                 border-radius: 24px;
                 display: flex; flex-direction: column; align-items: center; gap: 16px;
@@ -2378,7 +2616,7 @@
             title.style.cssText = `
                 font-family: Fredoka, Inter, system-ui, sans-serif;
                 font-size: 24px; font-weight: 700; color: #ffffff;
-                text-shadow: 0 0 24px rgba(56,189,248,0.4);
+                text-shadow: 0 0 24px ${titleGlow};
                 text-align: center;
             `;
             wrapper.appendChild(title);
@@ -2395,13 +2633,26 @@
             wrapper.appendChild(statsLine);
 
             const boardClone = boardEl.cloneNode(true);
-            boardClone.style.background = '#111d32';
+            boardClone.style.background = getComputedStyle(document.body).getPropertyValue('--bg-mid').trim();
             boardClone.style.border = '1px solid rgba(255,255,255,0.10)';
             boardClone.style.maxWidth = boardEl.offsetWidth + 'px';
 
             const captureStyle = document.createElement('style');
             captureStyle.textContent = `.grid-cell::before, .grid-cell::after { display: none !important; }`;
             boardClone.prepend(captureStyle);
+
+            // Read CSS variables once for theme-aware capture
+            const cs = getComputedStyle(document.body);
+            const cFrom = cs.getPropertyValue('--checked-from').trim();
+            const cMid = cs.getPropertyValue('--checked-mid').trim();
+            const cTo = cs.getPropertyValue('--checked-to').trim();
+            const cSpanFrom = cs.getPropertyValue('--checked-span-from').trim();
+            const cSpanTo = cs.getPropertyValue('--checked-span-to').trim();
+            const cEdge = cs.getPropertyValue('--checked-edge').trim();
+            const tFrom = cs.getPropertyValue('--tile-from').trim();
+            const tMid = cs.getPropertyValue('--tile-mid').trim();
+            const tTo = cs.getPropertyValue('--tile-to').trim();
+            const tEdge = cs.getPropertyValue('--ice-edge').trim();
 
             boardClone.querySelectorAll('.grid-cell').forEach(cell => {
                 const input = cell.querySelector('input');
@@ -2414,15 +2665,15 @@
                 if (cell.classList.contains('center-cell')) return;
 
                 if (isChecked) {
-                    cell.style.background = 'linear-gradient(155deg, #14b8a6 0%, #8b5cf6 50%, #6d28d9 100%)';
-                    cell.style.boxShadow = '0 4px 0 #134e4a, 0 6px 14px rgba(0,0,0,0.3)';
+                    cell.style.background = `linear-gradient(155deg, ${cFrom} 0%, ${cMid} 50%, ${cTo} 100%)`;
+                    cell.style.boxShadow = `0 4px 0 ${cEdge}, 0 6px 14px rgba(0,0,0,0.3)`;
                     if (span) {
-                        span.style.background = 'linear-gradient(135deg, #0f766e 0%, #5b21b6 100%)';
+                        span.style.background = `linear-gradient(135deg, ${cSpanFrom} 0%, ${cSpanTo} 100%)`;
                         span.style.borderRadius = '9px';
                     }
                 } else {
-                    cell.style.background = 'linear-gradient(155deg, #dae9f6 0%, #bdd4e8 60%, #a8c4dc 100%)';
-                    cell.style.boxShadow = '0 4px 0 #7ba6c9, 0 6px 14px rgba(0,0,0,0.25)';
+                    cell.style.background = `linear-gradient(155deg, ${tFrom} 0%, ${tMid} 60%, ${tTo} 100%)`;
+                    cell.style.boxShadow = `0 4px 0 ${tEdge}, 0 6px 14px rgba(0,0,0,0.25)`;
                     if (span) {
                         span.style.background = 'transparent';
                         span.style.boxShadow = 'none';
@@ -2445,7 +2696,7 @@
 
             try {
                 const canvas = await html2canvas(wrapper, {
-                    backgroundColor: '#0b1628',
+                    backgroundColor: bgDeep,
                     scale: 2,
                     useCORS: true,
                     logging: false
@@ -2596,6 +2847,7 @@
 
         // ─── Initialization ───
         buildThemePicker();
+        applyVisualTheme(currentTheme);
 
         // Check for challenge link in URL
         const fromUrl = loadFromUrl();
