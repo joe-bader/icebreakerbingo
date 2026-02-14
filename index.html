@@ -1401,6 +1401,42 @@
                 0 2px 8px rgba(56, 189, 248, 0.25);
         }
 
+        /* ─── Blackout Celebration ─── */
+        .overlay.blackout .overlay-card {
+            background: linear-gradient(165deg, #1a1040 0%, #0a0520 100%);
+            border-color: rgba(251, 191, 36, 0.3);
+            box-shadow:
+                0 0 60px rgba(251, 191, 36, 0.15),
+                0 25px 60px rgba(0, 0, 0, 0.5);
+        }
+        .overlay.blackout .overlay-card .trophy {
+            font-size: 5rem;
+            animation: blackoutStar 1.5s ease-in-out infinite;
+        }
+        .overlay.blackout .overlay-card h2 {
+            font-size: 2.8rem;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b, #fde68a, #f59e0b);
+            background-size: 300% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: goldShimmer 2s linear infinite;
+            text-shadow: none;
+        }
+        .overlay.blackout .overlay-card p {
+            color: var(--text-light);
+        }
+        @keyframes blackoutStar {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.1) rotate(5deg); }
+            50% { transform: scale(1) rotate(0deg); }
+            75% { transform: scale(1.1) rotate(-5deg); }
+        }
+        @keyframes goldShimmer {
+            0% { background-position: 100% 50%; }
+            100% { background-position: -100% 50%; }
+        }
+
         /* ─── Celebration Particles (Sparkles) ─── */
         .particle {
             position: fixed;
@@ -1546,7 +1582,7 @@
             </button>
             <header class="header">
                 <h1>Icebreaker Bingo</h1>
-                <p>Check every square that sounds like you! Share it and learn something new about your friends.</p>
+                <p>Check every square that sounds like you, then share it!</p>
             </header>
 
             <div class="theme-picker" id="themePicker" aria-label="Choose a theme"></div>
@@ -1917,7 +1953,7 @@
             [0, 6, 12, 18, 24], [4, 8, 12, 16, 20]
         ];
         const completedPatterns = new Set();
-        let wins = parseInt(sessionStorage.getItem('ib_sessionWins') || '0', 10);
+        let wins = 0;
         const hitMilestones = new Set();
 
         // ─── Personality Titles ───
@@ -2313,6 +2349,7 @@
             }
             updateStats();
             checkWins();
+            checkBlackout();
             saveDailyProgress();
         }
 
@@ -2378,7 +2415,6 @@
                 if (pattern.every(i => cells[i]) && !completedPatterns.has(patternIndex)) {
                     completedPatterns.add(patternIndex);
                     wins++;
-                    sessionStorage.setItem('ib_sessionWins', wins);
                     // Update best streak in localStorage
                     const best = parseInt(localStorage.getItem('ib_bestBingos') || '0', 10);
                     if (wins > best) localStorage.setItem('ib_bestBingos', wins);
@@ -2392,6 +2428,51 @@
             }
         }
 
+        let blackoutTriggered = false;
+
+        function checkBlackout() {
+            if (blackoutTriggered) return;
+            if (cells.every(Boolean)) {
+                blackoutTriggered = true;
+                // Close the normal bingo overlay if it's showing
+                const overlay = document.getElementById('overlay');
+                if (overlay.classList.contains('active')) {
+                    overlay.classList.remove('active');
+                    clearParticles();
+                }
+                // Short delay so the last bingo settles, then show blackout
+                setTimeout(() => showBlackoutCelebration(), 300);
+            }
+        }
+
+        function playBlackoutFanfare() {
+            const notes = [523, 659, 784, 880, 1047, 1175, 1319, 1568];
+            notes.forEach((f, i) => setTimeout(() => playTone(f, 0.4, 'sine', 0.14), i * 90));
+            // Final chord
+            setTimeout(() => {
+                playTone(1047, 0.6, 'sine', 0.12);
+                playTone(1319, 0.6, 'sine', 0.10);
+                playTone(1568, 0.8, 'sine', 0.10);
+            }, notes.length * 90);
+        }
+
+        function showBlackoutCelebration() {
+            playBlackoutFanfare();
+            createParticles(120);
+
+            // Update overlay content for blackout
+            document.getElementById('overlayTitle').textContent = 'BLACKOUT!';
+            document.querySelector('.overlay-card .trophy').innerHTML = '&#127775;';
+            document.getElementById('overlayDesc').textContent =
+                'Every single square! You are the ultimate icebreaker!';
+
+            const overlay = document.getElementById('overlay');
+            overlay.classList.add('active', 'blackout');
+            announce('Blackout! Every single square checked!');
+            const btn = document.getElementById('newBoardBtn');
+            if (btn) btn.focus();
+        }
+
         function showOverlay() {
             const overlay = document.getElementById('overlay');
             overlay.classList.add('active');
@@ -2402,8 +2483,16 @@
 
         function closeOverlay() {
             const overlay = document.getElementById('overlay');
-            overlay.classList.remove('active');
+            const wasBlackout = overlay.classList.contains('blackout');
+            overlay.classList.remove('active', 'blackout');
             clearParticles();
+            // Restore normal bingo overlay text
+            if (wasBlackout) {
+                document.getElementById('overlayTitle').textContent = 'Bingo!';
+                document.querySelector('.overlay-card .trophy').innerHTML = '&#127881;';
+                document.getElementById('overlayDesc').textContent =
+                    'You broke the ice! Spread the fun \u2014 share your board.';
+            }
             document.getElementById('bingo-game').focus();
         }
 
@@ -2479,6 +2568,7 @@
             hitMilestones.clear();
             cells.fill(false);
             completedPatterns.clear();
+            blackoutTriggered = false;
             // Don't reset wins — persist across boards in session
             currentTitle = '';
             suppressTitleToast = true;
