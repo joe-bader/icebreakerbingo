@@ -797,24 +797,57 @@
         .sound-toggle.active .icon-on { display: block; }
         .sound-toggle.active .icon-off { display: none; }
 
-        /* ─── Personality Title ─── */
-        .title-badge {
+        /* ─── Achievement Toast ─── */
+        .achievement-toast {
+            position: fixed;
+            top: 18px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-120px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 22px 10px 16px;
+            border-radius: 50px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06));
+            border: 1px solid rgba(255,255,255,0.18);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow:
+                0 8px 32px rgba(0,0,0,0.35),
+                0 0 20px var(--frame-glow);
+            opacity: 0;
+            pointer-events: none;
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
+        }
+        .achievement-toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        .achievement-toast .ach-icon {
+            font-size: 1.3rem;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+        .achievement-toast .ach-body {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+        .achievement-toast .ach-label {
+            font-family: 'Inter', system-ui, sans-serif;
+            font-size: 0.6rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-dim);
+        }
+        .achievement-toast .ach-title {
             font-family: 'Fredoka', 'Inter', sans-serif;
-            font-size: 0.85rem;
-            font-weight: 600;
+            font-size: 0.95rem;
+            font-weight: 700;
             color: var(--focus-ring);
-            text-align: center;
-            text-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
-            transition: all 0.3s ease;
-            min-height: 1.4em;
-        }
-        .title-badge.pop {
-            animation: titlePop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        @keyframes titlePop {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.15); }
-            100% { transform: scale(1); }
+            white-space: nowrap;
         }
 
         /* ─── Theme Picker ─── */
@@ -1528,7 +1561,6 @@
                     <span class="stat-value" id="winsCount" aria-labelledby="bingosLabel">0</span>
                 </div>
             </div>
-            <div class="title-badge" id="titleBadge" aria-live="polite"></div>
 
             <section class="board-frame">
                 <div class="grid-container" id="gridContainer" role="grid" aria-label="Bingo board"></div>
@@ -1631,6 +1663,15 @@
     </div>
 
     <!-- Toast notification -->
+    <!-- Achievement toast -->
+    <div class="achievement-toast" id="achievementToast" aria-live="polite" aria-atomic="true">
+        <span class="ach-icon" aria-hidden="true">&#127942;</span>
+        <div class="ach-body">
+            <span class="ach-label">Achievement Unlocked</span>
+            <span class="ach-title" id="achTitle"></span>
+        </div>
+    </div>
+
     <div class="share-toast" id="shareToast" aria-live="polite" aria-atomic="true">
         <span class="toast-icon"></span>
         <span class="toast-message"></span>
@@ -1888,6 +1929,7 @@
             [21, 'Certified Icebreaker']
         ];
         let currentTitle = '';
+        let suppressTitleToast = true;
 
         function getTitle(checked) {
             let title = titleTiers[0][1];
@@ -2308,15 +2350,14 @@
             const checked = cells.filter(Boolean).length;
             document.getElementById('checkedCount').textContent = checked;
 
-            // Update personality title
+            // Update personality title — show as achievement toast
             const newTitle = getTitle(checked);
-            const badge = document.getElementById('titleBadge');
             if (newTitle !== currentTitle) {
+                const wasEmpty = currentTitle === '';
                 currentTitle = newTitle;
-                badge.textContent = currentTitle;
-                badge.classList.remove('pop');
-                void badge.offsetWidth; // reflow
-                badge.classList.add('pop');
+                if (!suppressTitleToast && !wasEmpty) {
+                    showAchievementToast(currentTitle);
+                }
             }
 
             // Milestone confetti
@@ -2440,6 +2481,7 @@
             completedPatterns.clear();
             // Don't reset wins — persist across boards in session
             currentTitle = '';
+            suppressTitleToast = true;
             currentSeed = isDailyMode ? getDailySeed() : null;
             initBoard();
             grid.innerHTML = '';
@@ -2447,6 +2489,7 @@
                 loadDailyProgress();
             }
             createGrid();
+            suppressTitleToast = false;
         }
 
         // ─── Challenge Link Support ───
@@ -2531,6 +2574,23 @@
 
         const SHARE_URL = 'https://icebreakerbingo.com';
         let currentImageBlob = null;
+
+        let achToastTimeout = null;
+        function showAchievementToast(title) {
+            const toast = document.getElementById('achievementToast');
+            const titleEl = document.getElementById('achTitle');
+            titleEl.textContent = title;
+
+            // Reset animation
+            toast.classList.remove('show');
+            clearTimeout(achToastTimeout);
+            void toast.offsetWidth;
+            toast.classList.add('show');
+
+            achToastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3500);
+        }
 
         function showToast(icon, message, duration = 3000) {
             const toast = document.getElementById('shareToast');
@@ -2860,6 +2920,7 @@
 
         createGrid();
         document.getElementById('winsCount').textContent = wins;
+        suppressTitleToast = false;
 
         // Show compare button if this is a challenge link with opponent data
         if (window._challengerCells) {
