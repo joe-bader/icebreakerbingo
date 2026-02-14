@@ -2208,6 +2208,113 @@
             osc.stop(audioCtx.currentTime + duration);
         }
 
+        // size: 0 = small, 0.5 = medium, 1 = large
+        function playFireworkBoom(size = 0.5) {
+            if (!soundEnabled || !audioCtx) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const now = audioCtx.currentTime;
+
+            // Noise duration and volume scale with size
+            const noiseDur = 0.15 + size * 0.35;
+            const noiseVol = 0.06 + size * 0.12;
+
+            // Noise burst for the explosion crackle
+            const bufferSize = Math.floor(audioCtx.sampleRate * noiseDur);
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            const decayPow = 2 + (1 - size) * 3; // small = sharp decay, large = sustained
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, decayPow);
+            }
+            const noise = audioCtx.createBufferSource();
+            noise.buffer = buffer;
+
+            // Filter: large = low rumble, small = high crackle
+            const bpFilter = audioCtx.createBiquadFilter();
+            bpFilter.type = 'bandpass';
+            bpFilter.frequency.value = 2200 - size * 1600 + Math.random() * 400;
+            bpFilter.Q.value = 0.5 + (1 - size) * 1.0;
+
+            const noiseGain = audioCtx.createGain();
+            noiseGain.gain.setValueAtTime(noiseVol, now);
+            noiseGain.gain.exponentialRampToValueAtTime(0.001, now + noiseDur);
+
+            noise.connect(bpFilter);
+            bpFilter.connect(noiseGain);
+            noiseGain.connect(audioCtx.destination);
+            noise.start(now);
+            noise.stop(now + noiseDur);
+
+            // Low thump — dominant for large, subtle for small
+            const thumpFreq = 80 + (1 - size) * 180 + Math.random() * 40;
+            const thumpEnd = 20 + (1 - size) * 40;
+            const thumpDur = 0.1 + size * 0.25;
+            const thumpVol = 0.03 + size * 0.14;
+            const osc = audioCtx.createOscillator();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(thumpFreq, now);
+            osc.frequency.exponentialRampToValueAtTime(thumpEnd, now + thumpDur);
+            const oscGain = audioCtx.createGain();
+            oscGain.gain.setValueAtTime(thumpVol, now);
+            oscGain.gain.exponentialRampToValueAtTime(0.001, now + thumpDur);
+            osc.connect(oscGain);
+            oscGain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + thumpDur);
+
+            // Crackle pop — dominant for small, faint for large
+            const popFreq = 2000 + (1 - size) * 3000 + Math.random() * 1000;
+            const popDur = 0.04 + (1 - size) * 0.08;
+            const popVol = 0.02 + (1 - size) * 0.06;
+            const pop = audioCtx.createOscillator();
+            pop.type = 'square';
+            pop.frequency.setValueAtTime(popFreq, now);
+            pop.frequency.exponentialRampToValueAtTime(400 + size * 200, now + popDur);
+            const popGain = audioCtx.createGain();
+            popGain.gain.setValueAtTime(popVol, now);
+            popGain.gain.exponentialRampToValueAtTime(0.001, now + popDur);
+            pop.connect(popGain);
+            popGain.connect(audioCtx.destination);
+            pop.start(now);
+            pop.stop(now + popDur);
+
+            // Large explosions get a secondary rumble
+            if (size > 0.6) {
+                const rumble = audioCtx.createOscillator();
+                rumble.type = 'triangle';
+                rumble.frequency.setValueAtTime(50 + Math.random() * 20, now + 0.05);
+                rumble.frequency.exponentialRampToValueAtTime(25, now + 0.4);
+                const rumbleGain = audioCtx.createGain();
+                rumbleGain.gain.setValueAtTime(0.06 * size, now + 0.05);
+                rumbleGain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+                rumble.connect(rumbleGain);
+                rumbleGain.connect(audioCtx.destination);
+                rumble.start(now + 0.05);
+                rumble.stop(now + 0.4);
+            }
+
+            // Small explosions get extra high crackle pops
+            if (size < 0.35) {
+                for (let i = 0; i < 3; i++) {
+                    setTimeout(() => {
+                        if (!soundEnabled || !audioCtx) return;
+                        const t = audioCtx.currentTime;
+                        const p = audioCtx.createOscillator();
+                        p.type = 'square';
+                        p.frequency.setValueAtTime(4000 + Math.random() * 2000, t);
+                        p.frequency.exponentialRampToValueAtTime(1000, t + 0.03);
+                        const g = audioCtx.createGain();
+                        g.gain.setValueAtTime(0.03, t);
+                        g.gain.exponentialRampToValueAtTime(0.001, t + 0.03);
+                        p.connect(g);
+                        g.connect(audioCtx.destination);
+                        p.start(t);
+                        p.stop(t + 0.03);
+                    }, 40 + Math.random() * 100);
+                }
+            }
+        }
+
         function playIceCrack() {
             playTone(1800, 0.08, 'square', 0.06);
             setTimeout(() => playTone(2400, 0.06, 'square', 0.04), 30);
@@ -2666,17 +2773,23 @@
                 const palette = colors[Math.floor(Math.random() * colors.length)];
                 const burstX = 10 + Math.random() * 80;
                 const burstY = 12 + Math.random() * 45;
-                const baseRadius = 100 + Math.random() * 100;
-                const burstDuration = 1.3 + Math.random() * 0.4;
 
-                // Trail rising from bottom
+                // Random size: 0 = small, 0.5 = medium, 1 = large
+                const size = Math.random();
+                const baseRadius = 50 + size * 180;
+                const burstDuration = 0.9 + size * 0.8;
+
+                // Trail rising from bottom — bigger trail for bigger fireworks
+                const trailSize = 2 + size * 4;
                 const trail = document.createElement('div');
                 trail.className = 'firework-trail';
                 trail.setAttribute('aria-hidden', 'true');
                 trail.style.left = `${burstX}vw`;
                 trail.style.bottom = '0';
+                trail.style.width = `${trailSize}px`;
+                trail.style.height = `${trailSize}px`;
                 trail.style.background = palette[0];
-                trail.style.boxShadow = `0 0 8px ${palette[0]}, 0 0 16px ${palette[0]}`;
+                trail.style.boxShadow = `0 0 ${4 + size * 12}px ${palette[0]}, 0 0 ${8 + size * 16}px ${palette[0]}`;
                 const riseDistance = (100 - burstY);
                 trail.style.setProperty('--trail-duration', `${0.35 + Math.random() * 0.2}s`);
                 trail.style.setProperty('--trail-target-y', `-${riseDistance}vh`);
@@ -2693,14 +2806,19 @@
                     burst.style.top = `${burstY}vh`;
                     overlay.appendChild(burst);
 
-                    // Central flash
+                    playFireworkBoom(size);
+
+                    // Central flash — scales with size
                     const flash = document.createElement('div');
                     flash.className = 'firework-flash';
+                    const flashScale = 0.5 + size * 1.0;
+                    flash.style.width = `${30 * flashScale}px`;
+                    flash.style.height = `${30 * flashScale}px`;
                     flash.style.background = `radial-gradient(circle, ${palette[3] || palette[0]}, transparent)`;
                     burst.appendChild(flash);
 
-                    // Inner ring – dense core sparks
-                    const innerCount = 24 + Math.floor(Math.random() * 8);
+                    // Inner ring – spark count scales with size
+                    const innerCount = Math.floor(10 + size * 22 + Math.random() * 8);
                     for (let i = 0; i < innerCount; i++) {
                         const angle = (Math.PI * 2 * i) / innerCount + (Math.random() - 0.5) * 0.2;
                         const dist = baseRadius * (0.4 + Math.random() * 0.25);
@@ -2708,8 +2826,8 @@
                         makeSpark(burst, angle, dist, color, burstDuration * 0.85, 'spark-core');
                     }
 
-                    // Outer ring – wide spread
-                    const outerCount = 32 + Math.floor(Math.random() * 12);
+                    // Outer ring – more sparks for bigger fireworks
+                    const outerCount = Math.floor(14 + size * 30 + Math.random() * 10);
                     for (let i = 0; i < outerCount; i++) {
                         const angle = (Math.PI * 2 * i) / outerCount + (Math.random() - 0.5) * 0.25;
                         const dist = baseRadius * (0.8 + Math.random() * 0.3);
@@ -2718,7 +2836,7 @@
                     }
 
                     // Crackle sparks – delayed secondary pops
-                    const crackleCount = 16 + Math.floor(Math.random() * 10);
+                    const crackleCount = Math.floor(6 + size * 18 + Math.random() * 8);
                     setTimeout(() => {
                         for (let i = 0; i < crackleCount; i++) {
                             const angle = Math.random() * Math.PI * 2;
