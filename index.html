@@ -1402,13 +1402,89 @@
         }
 
         /* ─── Blackout Celebration ─── */
+        .overlay.blackout {
+            background: rgba(5, 5, 20, 0.92);
+        }
+
+        /* God rays – on the overlay itself, behind the card */
+        .overlay.blackout::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 200vmax;
+            height: 200vmax;
+            transform: translate(-50%, -50%);
+            z-index: 0;
+            pointer-events: none;
+            background: conic-gradient(
+                from 0deg,
+                rgba(251, 191, 36, 0.35) 0deg,   transparent 8deg,
+                transparent 22.5deg, rgba(245, 158, 11, 0.30) 22.5deg, transparent 30.5deg,
+                transparent 45deg,   rgba(253, 230, 138, 0.35) 45deg,  transparent 53deg,
+                transparent 67.5deg, rgba(251, 191, 36, 0.30) 67.5deg, transparent 75.5deg,
+                transparent 90deg,   rgba(245, 158, 11, 0.35) 90deg,   transparent 98deg,
+                transparent 112.5deg,rgba(253, 230, 138, 0.30) 112.5deg,transparent 120.5deg,
+                transparent 135deg,  rgba(251, 191, 36, 0.35) 135deg,  transparent 143deg,
+                transparent 157.5deg,rgba(245, 158, 11, 0.30) 157.5deg,transparent 165.5deg,
+                transparent 180deg,  rgba(253, 230, 138, 0.35) 180deg, transparent 188deg,
+                transparent 202.5deg,rgba(251, 191, 36, 0.30) 202.5deg,transparent 210.5deg,
+                transparent 225deg,  rgba(245, 158, 11, 0.35) 225deg,  transparent 233deg,
+                transparent 247.5deg,rgba(253, 230, 138, 0.30) 247.5deg,transparent 255.5deg,
+                transparent 270deg,  rgba(251, 191, 36, 0.35) 270deg,  transparent 278deg,
+                transparent 292.5deg,rgba(245, 158, 11, 0.30) 292.5deg,transparent 300.5deg,
+                transparent 315deg,  rgba(253, 230, 138, 0.35) 315deg, transparent 323deg,
+                transparent 337.5deg,rgba(251, 191, 36, 0.30) 337.5deg,transparent 345.5deg,
+                transparent 360deg
+            );
+            animation: godRaysSpin 20s linear infinite, godRaysFade 0.8s ease-out forwards;
+            border-radius: 50%;
+            mask-image: radial-gradient(circle, white 15%, transparent 65%);
+            -webkit-mask-image: radial-gradient(circle, white 15%, transparent 65%);
+        }
+
+        /* Ray sparkles container – rotates with god rays */
+        .ray-sparkles {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 200vmax;
+            height: 200vmax;
+            transform: translate(-50%, -50%);
+            z-index: 0;
+            pointer-events: none;
+            border-radius: 50%;
+            animation: godRaysSpin 20s linear infinite, godRaysFade 1s ease-out forwards;
+        }
+        .ray-sparkle {
+            position: absolute;
+            border-radius: 50%;
+            animation: rayTwinkle var(--twinkle-dur, 1.2s) ease-in-out var(--twinkle-delay, 0s) infinite;
+        }
+
+        @keyframes godRaysSpin {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        @keyframes godRaysFade {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes rayTwinkle {
+            0%, 100% { opacity: 0.15; transform: translate(-50%, -50%) scale(0.6); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+        }
+
         .overlay.blackout .overlay-card {
             background: linear-gradient(165deg, #1a1040 0%, #0a0520 100%);
-            border-color: rgba(251, 191, 36, 0.3);
+            border-color: rgba(251, 191, 36, 0.4);
             box-shadow:
-                0 0 60px rgba(251, 191, 36, 0.15),
+                0 0 80px rgba(251, 191, 36, 0.25),
                 0 25px 60px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 1;
         }
+
         .overlay.blackout .overlay-card .trophy {
             font-size: 5rem;
             animation: blackoutStar 1.5s ease-in-out infinite;
@@ -1443,6 +1519,109 @@
             pointer-events: none;
             animation: sparklefall linear forwards;
             z-index: 1001;
+        }
+
+        /* ─── Fireworks ─── */
+        .firework-burst {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1001;
+            width: 0;
+            height: 0;
+        }
+        .firework-spark {
+            position: absolute;
+            border-radius: 50%;
+            top: 0;
+            left: 0;
+            transform: translate(-50%, -50%);
+            animation: fireworkExplode var(--fw-duration, 1.4s) cubic-bezier(0.22, 0, 0.3, 1) forwards;
+            --fw-x: 0px;
+            --fw-y: 0px;
+        }
+        .firework-spark.spark-core {
+            width: 8px;
+            height: 8px;
+        }
+        .firework-spark.spark-outer {
+            width: 5px;
+            height: 5px;
+        }
+        .firework-spark.spark-crackle {
+            width: 4px;
+            height: 4px;
+        }
+        .firework-spark::after {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 50%;
+            background: inherit;
+            filter: blur(4px);
+            opacity: 0.5;
+        }
+        .firework-flash {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            top: 0;
+            left: 0;
+            transform: translate(-50%, -50%);
+            animation: fireworkFlash 0.4s ease-out forwards;
+            pointer-events: none;
+        }
+        .firework-trail {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1001;
+            animation: fireworkRise var(--trail-duration, 0.6s) cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+            --trail-target-y: 0px;
+        }
+        .firework-trail::after {
+            content: '';
+            position: absolute;
+            width: 2px;
+            height: 20px;
+            background: linear-gradient(to top, transparent, inherit);
+            border-radius: 2px;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0.4;
+        }
+        @keyframes fireworkRise {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            60% { opacity: 1; transform: translateY(calc(var(--trail-target-y) * 0.6)) scale(0.8); }
+            100% {
+                opacity: 0;
+                transform: translateY(var(--trail-target-y)) scale(0.3);
+            }
+        }
+        @keyframes fireworkExplode {
+            0% {
+                transform: translate(-50%, -50%) translate(0, 0) scale(1.5);
+                opacity: 1;
+            }
+            20% {
+                opacity: 1;
+                transform: translate(-50%, -50%) translate(calc(var(--fw-x) * 0.6), calc(var(--fw-y) * 0.6)) scale(1);
+            }
+            100% {
+                transform: translate(-50%, -50%) translate(var(--fw-x), var(--fw-y)) scale(0);
+                opacity: 0;
+            }
+        }
+        @keyframes fireworkFlash {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+            50% { transform: translate(-50%, -50%) scale(3); opacity: 0.6; }
+            100% { transform: translate(-50%, -50%) scale(5); opacity: 0; }
         }
 
         /* ─── Responsive: Hide sidebars ─── */
@@ -2456,9 +2635,174 @@
             }, notes.length * 90);
         }
 
+        function launchFireworks(count = 12, duration = 5000) {
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            const colors = [
+                ['#fbbf24', '#f59e0b', '#fde68a', '#fcd34d'],
+                ['#38bdf8', '#67e8f9', '#818cf8', '#a5f3fc'],
+                ['#f0abfc', '#e879f9', '#d946ef', '#f5d0fe'],
+                ['#34d399', '#6ee7b7', '#a7f3d0', '#5eead4'],
+                ['#fb7185', '#f43f5e', '#fda4af', '#fecdd3'],
+                ['#fbbf24', '#fb923c', '#fde68a', '#fdba74'],
+            ];
+            let launched = 0;
+            const interval = duration / count;
+
+            function makeSpark(burst, angle, dist, color, dur, cls) {
+                const spark = document.createElement('div');
+                spark.className = `firework-spark ${cls}`;
+                spark.style.background = color;
+                spark.style.boxShadow = `0 0 10px ${color}, 0 0 24px ${color}`;
+                spark.style.setProperty('--fw-x', `${Math.cos(angle) * dist}px`);
+                spark.style.setProperty('--fw-y', `${Math.sin(angle) * dist + dist * 0.25}px`);
+                spark.style.setProperty('--fw-duration', `${dur}s`);
+                spark.style.animationDelay = `${Math.random() * 0.06}s`;
+                burst.appendChild(spark);
+            }
+
+            function spawnBurst() {
+                if (launched >= count) return;
+                launched++;
+                const palette = colors[Math.floor(Math.random() * colors.length)];
+                const burstX = 10 + Math.random() * 80;
+                const burstY = 12 + Math.random() * 45;
+                const baseRadius = 100 + Math.random() * 100;
+                const burstDuration = 1.3 + Math.random() * 0.4;
+
+                // Trail rising from bottom
+                const trail = document.createElement('div');
+                trail.className = 'firework-trail';
+                trail.setAttribute('aria-hidden', 'true');
+                trail.style.left = `${burstX}vw`;
+                trail.style.bottom = '0';
+                trail.style.background = palette[0];
+                trail.style.boxShadow = `0 0 8px ${palette[0]}, 0 0 16px ${palette[0]}`;
+                const riseDistance = (100 - burstY);
+                trail.style.setProperty('--trail-duration', `${0.35 + Math.random() * 0.2}s`);
+                trail.style.setProperty('--trail-target-y', `-${riseDistance}vh`);
+                document.body.appendChild(trail);
+
+                const trailTime = parseFloat(trail.style.getPropertyValue('--trail-duration')) * 1000;
+                setTimeout(() => {
+                    trail.remove();
+                    const burst = document.createElement('div');
+                    burst.className = 'firework-burst';
+                    burst.setAttribute('aria-hidden', 'true');
+                    burst.style.left = `${burstX}vw`;
+                    burst.style.top = `${burstY}vh`;
+                    document.body.appendChild(burst);
+
+                    // Central flash
+                    const flash = document.createElement('div');
+                    flash.className = 'firework-flash';
+                    flash.style.background = `radial-gradient(circle, ${palette[3] || palette[0]}, transparent)`;
+                    burst.appendChild(flash);
+
+                    // Inner ring – dense core sparks
+                    const innerCount = 24 + Math.floor(Math.random() * 8);
+                    for (let i = 0; i < innerCount; i++) {
+                        const angle = (Math.PI * 2 * i) / innerCount + (Math.random() - 0.5) * 0.2;
+                        const dist = baseRadius * (0.4 + Math.random() * 0.25);
+                        const color = palette[Math.floor(Math.random() * palette.length)];
+                        makeSpark(burst, angle, dist, color, burstDuration * 0.85, 'spark-core');
+                    }
+
+                    // Outer ring – wide spread
+                    const outerCount = 32 + Math.floor(Math.random() * 12);
+                    for (let i = 0; i < outerCount; i++) {
+                        const angle = (Math.PI * 2 * i) / outerCount + (Math.random() - 0.5) * 0.25;
+                        const dist = baseRadius * (0.8 + Math.random() * 0.3);
+                        const color = palette[Math.floor(Math.random() * palette.length)];
+                        makeSpark(burst, angle, dist, color, burstDuration, 'spark-outer');
+                    }
+
+                    // Crackle sparks – delayed secondary pops
+                    const crackleCount = 16 + Math.floor(Math.random() * 10);
+                    setTimeout(() => {
+                        for (let i = 0; i < crackleCount; i++) {
+                            const angle = Math.random() * Math.PI * 2;
+                            const origin = baseRadius * (0.3 + Math.random() * 0.5);
+                            const dist = 20 + Math.random() * 40;
+                            const color = palette[Math.floor(Math.random() * palette.length)];
+                            const spark = document.createElement('div');
+                            spark.className = 'firework-spark spark-crackle';
+                            spark.style.background = color;
+                            spark.style.boxShadow = `0 0 6px ${color}, 0 0 14px ${color}`;
+                            const ox = Math.cos(angle) * origin;
+                            const oy = Math.sin(angle) * origin;
+                            spark.style.left = `${ox}px`;
+                            spark.style.top = `${oy}px`;
+                            const subAngle = angle + (Math.random() - 0.5) * 1.5;
+                            spark.style.setProperty('--fw-x', `${Math.cos(subAngle) * dist}px`);
+                            spark.style.setProperty('--fw-y', `${Math.sin(subAngle) * dist + 15}px`);
+                            spark.style.setProperty('--fw-duration', `${0.5 + Math.random() * 0.3}s`);
+                            burst.appendChild(spark);
+                        }
+                    }, burstDuration * 400);
+
+                    // Clean up
+                    setTimeout(() => burst.remove(), burstDuration * 1000 + 800);
+                }, trailTime);
+
+                setTimeout(spawnBurst, interval * (0.4 + Math.random() * 0.6));
+            }
+
+            spawnBurst();
+        }
+
+        function createRaySparkles() {
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            const overlay = document.getElementById('overlay');
+            const container = document.createElement('div');
+            container.className = 'ray-sparkles';
+            container.setAttribute('aria-hidden', 'true');
+
+            // Center angles of each ray (matching conic-gradient)
+            const rayAngles = [4, 26.5, 49, 71.5, 94, 116.5, 139, 161.5,
+                               184, 206.5, 229, 251.5, 274, 296.5, 319, 341.5];
+            const rayHalfWidth = 4; // degrees from center to edge
+            const colors = ['#ffffff', '#fde68a', '#fbbf24', '#fef9c3', '#f59e0b'];
+
+            rayAngles.forEach(center => {
+                const sparkleCount = 12 + Math.floor(Math.random() * 6);
+                for (let i = 0; i < sparkleCount; i++) {
+                    const sparkle = document.createElement('div');
+                    sparkle.className = 'ray-sparkle';
+                    // Stay within the ray's angular width
+                    const angleDeg = center + (Math.random() - 0.5) * rayHalfWidth * 2;
+                    const angleRad = angleDeg * Math.PI / 180;
+                    // Distribute along the ray's length (5% to 45% from center)
+                    const dist = 5 + Math.random() * 40;
+                    const x = 50 + Math.cos(angleRad) * dist;
+                    const y = 50 + Math.sin(angleRad) * dist;
+                    sparkle.style.left = `${x}%`;
+                    sparkle.style.top = `${y}%`;
+
+                    const size = 1.5 + Math.random() * 4;
+                    sparkle.style.width = `${size}px`;
+                    sparkle.style.height = `${size}px`;
+
+                    const color = colors[Math.floor(Math.random() * colors.length)];
+                    sparkle.style.background = color;
+                    sparkle.style.boxShadow = `0 0 ${size + 2}px ${color}`;
+
+                    sparkle.style.setProperty('--twinkle-dur', `${0.6 + Math.random() * 1.4}s`);
+                    sparkle.style.setProperty('--twinkle-delay', `${Math.random() * 2}s`);
+
+                    container.appendChild(sparkle);
+                }
+            });
+
+            overlay.appendChild(container);
+        }
+
+        function clearRaySparkles() {
+            document.querySelectorAll('.ray-sparkles').forEach(el => el.remove());
+        }
+
         function showBlackoutCelebration() {
             playBlackoutFanfare();
-            createParticles(120);
+            launchFireworks(10, 5000);
 
             // Update overlay content for blackout
             document.getElementById('overlayTitle').textContent = 'BLACKOUT!';
@@ -2468,6 +2812,7 @@
 
             const overlay = document.getElementById('overlay');
             overlay.classList.add('active', 'blackout');
+            createRaySparkles();
             announce('Blackout! Every single square checked!');
             const btn = document.getElementById('newBoardBtn');
             if (btn) btn.focus();
@@ -2486,6 +2831,7 @@
             const wasBlackout = overlay.classList.contains('blackout');
             overlay.classList.remove('active', 'blackout');
             clearParticles();
+            clearRaySparkles();
             // Restore normal bingo overlay text
             if (wasBlackout) {
                 document.getElementById('overlayTitle').textContent = 'Bingo!';
@@ -2521,7 +2867,7 @@
         }
 
         function clearParticles() {
-            document.querySelectorAll('.particle').forEach(p => p.remove());
+            document.querySelectorAll('.particle, .firework-burst, .firework-trail, .firework-flash').forEach(p => p.remove());
         }
 
         // Close overlay on background click
