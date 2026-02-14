@@ -1482,7 +1482,7 @@
                 0 0 80px rgba(251, 191, 36, 0.25),
                 0 25px 60px rgba(0, 0, 0, 0.5);
             position: relative;
-            z-index: 1;
+            z-index: 2;
         }
 
         .overlay.blackout .overlay-card .trophy {
@@ -1518,14 +1518,14 @@
             position: fixed;
             pointer-events: none;
             animation: sparklefall linear forwards;
-            z-index: 1001;
+            z-index: 999;
         }
 
         /* ─── Fireworks ─── */
         .firework-burst {
             position: fixed;
             pointer-events: none;
-            z-index: 1001;
+            z-index: 1;
             width: 0;
             height: 0;
         }
@@ -1577,7 +1577,7 @@
             height: 4px;
             border-radius: 50%;
             pointer-events: none;
-            z-index: 1001;
+            z-index: 1;
             animation: fireworkRise var(--trail-duration, 0.6s) cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
             --trail-target-y: 0px;
         }
@@ -2635,8 +2635,11 @@
             }, notes.length * 90);
         }
 
-        function launchFireworks(count = 12, duration = 5000) {
+        let fireworksActive = false;
+
+        function launchFireworks() {
             if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            fireworksActive = true;
             const colors = [
                 ['#fbbf24', '#f59e0b', '#fde68a', '#fcd34d'],
                 ['#38bdf8', '#67e8f9', '#818cf8', '#a5f3fc'],
@@ -2645,8 +2648,6 @@
                 ['#fb7185', '#f43f5e', '#fda4af', '#fecdd3'],
                 ['#fbbf24', '#fb923c', '#fde68a', '#fdba74'],
             ];
-            let launched = 0;
-            const interval = duration / count;
 
             function makeSpark(burst, angle, dist, color, dur, cls) {
                 const spark = document.createElement('div');
@@ -2661,8 +2662,7 @@
             }
 
             function spawnBurst() {
-                if (launched >= count) return;
-                launched++;
+                if (!fireworksActive) return;
                 const palette = colors[Math.floor(Math.random() * colors.length)];
                 const burstX = 10 + Math.random() * 80;
                 const burstY = 12 + Math.random() * 45;
@@ -2680,7 +2680,8 @@
                 const riseDistance = (100 - burstY);
                 trail.style.setProperty('--trail-duration', `${0.35 + Math.random() * 0.2}s`);
                 trail.style.setProperty('--trail-target-y', `-${riseDistance}vh`);
-                document.body.appendChild(trail);
+                const overlay = document.getElementById('overlay');
+                overlay.appendChild(trail);
 
                 const trailTime = parseFloat(trail.style.getPropertyValue('--trail-duration')) * 1000;
                 setTimeout(() => {
@@ -2690,7 +2691,7 @@
                     burst.setAttribute('aria-hidden', 'true');
                     burst.style.left = `${burstX}vw`;
                     burst.style.top = `${burstY}vh`;
-                    document.body.appendChild(burst);
+                    overlay.appendChild(burst);
 
                     // Central flash
                     const flash = document.createElement('div');
@@ -2744,7 +2745,7 @@
                     setTimeout(() => burst.remove(), burstDuration * 1000 + 800);
                 }, trailTime);
 
-                setTimeout(spawnBurst, interval * (0.4 + Math.random() * 0.6));
+                setTimeout(spawnBurst, 300 + Math.random() * 600);
             }
 
             spawnBurst();
@@ -2802,7 +2803,7 @@
 
         function showBlackoutCelebration() {
             playBlackoutFanfare();
-            launchFireworks(10, 5000);
+            launchFireworks();
 
             // Update overlay content for blackout
             document.getElementById('overlayTitle').textContent = 'BLACKOUT!';
@@ -2830,6 +2831,7 @@
             const overlay = document.getElementById('overlay');
             const wasBlackout = overlay.classList.contains('blackout');
             overlay.classList.remove('active', 'blackout');
+            fireworksActive = false;
             clearParticles();
             clearRaySparkles();
             // Restore normal bingo overlay text
