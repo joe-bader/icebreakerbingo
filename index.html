@@ -2258,7 +2258,8 @@
         }
 
         // ─── Sound System ───
-        let soundEnabled = false;
+        const storedSound = localStorage.getItem('ib_sound');
+        let soundEnabled = storedSound === 'on';
         const audioCtx = typeof AudioContext !== 'undefined' ? new AudioContext() : null;
 
         function playTone(freq, duration, type = 'sine', volume = 0.15) {
@@ -2405,6 +2406,7 @@
 
         document.getElementById('soundToggle').addEventListener('click', () => {
             soundEnabled = !soundEnabled;
+            localStorage.setItem('ib_sound', soundEnabled ? 'on' : 'off');
             const btn = document.getElementById('soundToggle');
             btn.classList.toggle('active', soundEnabled);
             btn.classList.remove('hint-pulse');
@@ -2414,6 +2416,18 @@
         // Respect prefers-reduced-motion
         if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
             soundEnabled = false;
+        }
+
+        // Apply persisted sound state to UI
+        {
+            const btn = document.getElementById('soundToggle');
+            if (soundEnabled) {
+                btn.classList.add('active');
+                btn.classList.remove('hint-pulse');
+            } else if (storedSound !== null) {
+                // User has toggled before, don't show hint pulse
+                btn.classList.remove('hint-pulse');
+            }
         }
 
         // ─── Visual Theme Config ───
@@ -2702,10 +2716,18 @@
                 spawnIceShards(index);
             } else {
                 playUncheck();
+                // Reset blackout if a tile is deselected
+                if (blackoutTriggered) {
+                    blackoutTriggered = false;
+                }
             }
             updateStats();
-            checkWins();
-            checkBlackout();
+            if (cells[index]) {
+                checkWins();
+                checkBlackout();
+            } else {
+                reconcileWins();
+            }
             saveDailyProgress();
         }
 
@@ -2755,6 +2777,10 @@
 
             // Milestone confetti
             const milestones = [10, 15, 20];
+            // Reset milestones that are no longer met
+            for (const m of [...hitMilestones]) {
+                if (checked < m) hitMilestones.delete(m);
+            }
             for (const m of milestones) {
                 if (checked >= m && !hitMilestones.has(m)) {
                     hitMilestones.add(m);
@@ -2766,7 +2792,19 @@
             }
         }
 
+        function reconcileWins() {
+            // Remove patterns that are no longer complete (tile was deselected)
+            for (const pi of [...completedPatterns]) {
+                if (!winningPatterns[pi].every(i => cells[i])) {
+                    completedPatterns.delete(pi);
+                    wins = Math.max(0, wins - 1);
+                }
+            }
+            document.getElementById('winsCount').textContent = wins;
+        }
+
         function checkWins() {
+            // Check for newly completed patterns
             for (const [patternIndex, pattern] of winningPatterns.entries()) {
                 if (pattern.every(i => cells[i]) && !completedPatterns.has(patternIndex)) {
                     completedPatterns.add(patternIndex);
