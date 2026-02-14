@@ -272,6 +272,18 @@
         .share-panel-hint .hint-icon {
             color: #34d399;
         }
+        .share-panel-hint .wave-char {
+            display: inline-block;
+            color: var(--text-muted);
+        }
+        .share-panel-hint.has-image .wave-char {
+            animation: hintWave 6s ease-in-out infinite;
+        }
+        @keyframes hintWave {
+            0%, 100% { color: var(--text-muted); transform: translateY(0); }
+            8% { color: #34d399; transform: translateY(-3px); }
+            16% { color: var(--text-muted); transform: translateY(0); }
+        }
 
         /* Platform button grid */
         .share-platforms {
@@ -2305,6 +2317,25 @@
             const overlay = document.getElementById('shareOverlay');
             overlay.classList.remove('active');
             overlay.setAttribute('aria-hidden', 'true');
+            const hint = document.getElementById('sharePanelHint');
+            hint.classList.remove('has-image');
+        }
+
+        function setHintWave(el, text) {
+            el.innerHTML = '';
+            let charIndex = 0;
+            for (let i = 0; i < text.length; i++) {
+                const span = document.createElement('span');
+                span.className = 'wave-char';
+                if (text[i] === ' ') {
+                    span.innerHTML = '&nbsp;';
+                } else {
+                    span.textContent = text[i];
+                }
+                span.style.animationDelay = (charIndex * 0.04) + 's';
+                el.appendChild(span);
+                charIndex++;
+            }
         }
 
         async function copyImageToClipboard(blob) {
@@ -2467,9 +2498,11 @@
             const copied = await copyImageToClipboard(blob);
             const hint = document.getElementById('sharePanelHint');
             if (copied) {
-                hint.innerHTML = '<span class="hint-icon">&#10003;</span> Image copied to clipboard &mdash; paste it in your post!';
+                setHintWave(hint, '\u2713 Image copied to clipboard \u2014 paste it in your post!');
+                hint.classList.add('has-image');
             } else {
                 hint.textContent = 'Use the buttons below to share or download your board.';
+                hint.classList.remove('has-image');
             }
             openSharePanel();
         }
