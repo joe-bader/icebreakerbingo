@@ -61,6 +61,16 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        @font-face {
+            font-family: 'DSEG7';
+            src: url('https://cdn.jsdelivr.net/npm/dseg@0.46/fonts/DSEG7-Classic/DSEG7Classic-Bold.woff2') format('woff2'),
+                 url('https://cdn.jsdelivr.net/npm/dseg@0.46/fonts/DSEG7-Classic/DSEG7Classic-Bold.woff') format('woff');
+            font-weight: bold;
+            font-style: normal;
+            font-display: swap;
+        }
+    </style>
+    <style>
         :root {
             /* Arctic palette */
             --bg-deep: #091832;
@@ -676,50 +686,60 @@
             font-weight: 500;
         }
 
-        /* ─── Stats Bar (Game HUD) ─── */
-        .stats-bar {
+        /* ─── HUD Row ─── */
+        .hud-row {
             display: flex;
-            gap: 2px;
-            background: var(--frost-surface);
-            border: 1px solid var(--frost-border);
-            padding: 4px;
-            border-radius: var(--radius-lg);
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        /* ─── Scoreboard ─── */
+        .stats-bar {
+            display: inline-flex;
+            align-items: center;
+            gap: 0;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: var(--radius-md);
+            padding: 0;
             box-shadow:
-                0 4px 24px rgba(0, 0, 0, 0.2),
-                inset 0 1px 1px rgba(255, 255, 255, 0.05);
-            width: 100%;
-            max-width: 300px;
+                inset 0 2px 6px rgba(0, 0, 0, 0.4),
+                inset 0 0 1px rgba(0, 0, 0, 0.3);
         }
 
         .stat-item {
-            flex: 1;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            padding: 8px 16px;
-            border-radius: var(--radius-md);
-            transition: background var(--transition);
+            gap: 6px;
+            padding: 5px 14px;
         }
 
-        .stat-item:hover {
-            background: rgba(56, 189, 248, 0.06);
+        .stat-divider {
+            width: 1px;
+            height: 18px;
+            background: rgba(255, 255, 255, 0.08);
+            flex-shrink: 0;
         }
 
         .stat-label {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             font-weight: 700;
-            color: var(--text-dim);
+            color: rgba(255, 255, 255, 0.35);
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.08em;
         }
 
         .stat-value {
-            font-family: 'Fredoka', 'Inter', sans-serif;
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: var(--focus-ring);
-            line-height: 1.2;
-            text-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
+            font-family: 'DSEG7', 'Fredoka', monospace;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #38bdf8;
+            line-height: 1;
+            text-shadow: 0 0 8px rgba(56, 189, 248, 0.5), 0 0 20px rgba(56, 189, 248, 0.2);
+            min-width: 1.4em;
+            text-align: center;
         }
 
         /* ─── Reset Button (below board) ─── */
@@ -771,31 +791,64 @@
 
         /* ─── Sound Toggle ─── */
         .sound-toggle {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px 5px 10px;
+            border-radius: 100px;
             background: var(--frost-surface);
             border: 1px solid var(--frost-border);
-            color: var(--text-dim);
+            color: #fbbf24;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             transition: all var(--transition);
-            z-index: 5;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            border-color: rgba(251, 191, 36, 0.25);
+            box-shadow:
+                0 2px 12px rgba(0, 0, 0, 0.2),
+                inset 0 1px 1px rgba(255, 255, 255, 0.05);
         }
         .sound-toggle:hover {
-            background: rgba(56, 189, 248, 0.12);
-            color: var(--text-bright);
+            background: rgba(251, 191, 36, 0.12);
+            color: #fde68a;
+            border-color: rgba(251, 191, 36, 0.4);
         }
-        .sound-toggle svg { width: 18px; height: 18px; }
+        .sound-toggle.active {
+            border-color: rgba(251, 191, 36, 0.4);
+            color: #fde68a;
+        }
+        .sound-toggle svg { width: 16px; height: 16px; flex-shrink: 0; }
         .sound-toggle .icon-on { display: none; }
         .sound-toggle .icon-off { display: block; }
         .sound-toggle.active .icon-on { display: block; }
         .sound-toggle.active .icon-off { display: none; }
+        .sound-toggle .sound-label-on { display: none; }
+        .sound-toggle .sound-label-off { display: inline; }
+        .sound-toggle.active .sound-label-on { display: inline; }
+        .sound-toggle.active .sound-label-off { display: none; }
+
+        /* Attention pulse on first load */
+        .sound-toggle.hint-pulse {
+            animation: soundHintPulse 2s ease-in-out 3;
+        }
+        @keyframes soundHintPulse {
+            0%, 100% {
+                box-shadow:
+                    0 2px 12px rgba(0, 0, 0, 0.2),
+                    inset 0 1px 1px rgba(255, 255, 255, 0.05);
+            }
+            50% {
+                box-shadow:
+                    0 2px 12px rgba(0, 0, 0, 0.2),
+                    inset 0 1px 1px rgba(255, 255, 255, 0.05),
+                    0 0 12px rgba(251, 191, 36, 0.4),
+                    0 0 24px rgba(251, 191, 36, 0.18);
+                border-color: rgba(251, 191, 36, 0.45);
+            }
+        }
 
         /* ─── Achievement Toast ─── */
         .achievement-toast {
@@ -1649,12 +1702,13 @@
                 font-size: 0.82rem;
             }
 
-            .stats-bar {
-                max-width: 260px;
+            .stat-item {
+                padding: 4px 10px;
+                gap: 5px;
             }
 
             .stat-value {
-                font-size: 1.3rem;
+                font-size: 1rem;
             }
 
             .grid-container {
@@ -1721,8 +1775,17 @@
                     inset 0 1px 2px rgba(255, 255, 255, 0.6);
             }
 
-            .stats-bar {
-                max-width: 220px;
+            .stat-item {
+                padding: 3px 8px;
+                gap: 4px;
+            }
+
+            .stat-value {
+                font-size: 0.95rem;
+            }
+
+            .stat-label {
+                font-size: 0.6rem;
             }
 
             .board-frame {
@@ -1755,10 +1818,6 @@
 
         <!-- Main Game Content -->
         <main class="main-content" id="bingo-game" tabindex="-1" style="position:relative;">
-            <button class="sound-toggle" id="soundToggle" aria-label="Toggle sound" title="Toggle sound">
-                <svg class="icon-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-                <svg class="icon-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
-            </button>
             <header class="header">
                 <h1>Icebreaker Bingo</h1>
                 <p>Check every square that sounds like you, then share it!</p>
@@ -1766,15 +1825,24 @@
 
             <div class="theme-picker" id="themePicker" aria-label="Choose a theme"></div>
 
-            <div class="stats-bar" role="status" aria-live="polite" aria-atomic="true" aria-label="Game statistics">
-                <div class="stat-item">
-                    <span class="stat-label" id="checkedLabel">Checked</span>
-                    <span class="stat-value" id="checkedCount" aria-labelledby="checkedLabel">0</span>
+            <div class="hud-row">
+                <div class="stats-bar" role="status" aria-live="polite" aria-atomic="true" aria-label="Game statistics">
+                    <div class="stat-item">
+                        <span class="stat-label" id="checkedLabel">Checked</span>
+                        <span class="stat-value" id="checkedCount" aria-labelledby="checkedLabel">0</span>
+                    </div>
+                    <div class="stat-divider" aria-hidden="true"></div>
+                    <div class="stat-item">
+                        <span class="stat-label" id="bingosLabel">Bingos</span>
+                        <span class="stat-value" id="winsCount" aria-labelledby="bingosLabel">0</span>
+                    </div>
                 </div>
-                <div class="stat-item">
-                    <span class="stat-label" id="bingosLabel">Bingos</span>
-                    <span class="stat-value" id="winsCount" aria-labelledby="bingosLabel">0</span>
-                </div>
+                <button class="sound-toggle hint-pulse" id="soundToggle" aria-label="Toggle sound" title="Toggle sound effects">
+                    <svg class="icon-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                    <svg class="icon-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+                    <span class="sound-label-off">Sound</span>
+                    <span class="sound-label-on">Sound</span>
+                </button>
             </div>
 
             <section class="board-frame">
@@ -2337,7 +2405,9 @@
 
         document.getElementById('soundToggle').addEventListener('click', () => {
             soundEnabled = !soundEnabled;
-            document.getElementById('soundToggle').classList.toggle('active', soundEnabled);
+            const btn = document.getElementById('soundToggle');
+            btn.classList.toggle('active', soundEnabled);
+            btn.classList.remove('hint-pulse');
             if (soundEnabled && audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
         });
 
