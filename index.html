@@ -514,13 +514,13 @@
         .platform-btn[data-platform="whatsapp"]:hover { border-color: #25D366; box-shadow: 0 4px 16px rgba(37, 211, 102, 0.2); }
         .platform-btn[data-platform="email"]:hover { border-color: #f59e0b; box-shadow: 0 4px 16px rgba(245, 158, 11, 0.15); }
 
-        /* Secondary actions row */
+        /* Secondary actions grid */
         .share-secondary {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
             gap: 10px;
         }
         .share-secondary button {
-            flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -535,6 +535,9 @@
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s ease;
+        }
+        .share-secondary button#shareNativeBtn {
+            grid-column: 1 / -1;
         }
         .share-secondary button:hover {
             background: rgba(255, 255, 255, 0.1);
@@ -1929,6 +1932,10 @@
                 </button>
             </div>
             <div class="share-secondary">
+                <button id="shareNativeBtn" style="display:none" aria-label="Share with image via AirDrop, Messages, and more">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                    Share via&hellip;
+                </button>
                 <button id="shareCopyBtn" aria-label="Copy image to clipboard">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                     Copy Image
@@ -3693,7 +3700,6 @@
             const shareBtns = document.querySelectorAll('#shareBtn, #overlayShareBtn');
             shareBtns.forEach(btn => { btn.disabled = true; btn.style.opacity = '0.6'; });
 
-            // Detect mobile: use native share API which handles files well
             const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
             const blob = await generateBoardImage();
@@ -3706,7 +3712,7 @@
             currentImageBlob = blob;
 
             if (isMobile && navigator.canShare) {
-                // Mobile: try native file sharing first
+                // Mobile: use native share API which attaches the image directly
                 try {
                     const file = new File([blob], 'icebreaker-bingo.png', { type: 'image/png' });
                     if (navigator.canShare({ files: [file] })) {
@@ -3724,6 +3730,14 @@
             }
 
             // Desktop (or mobile fallback): copy to clipboard + show share panel
+            // Show/hide native share button based on browser support
+            const nativeShareBtn = document.getElementById('shareNativeBtn');
+            if (nativeShareBtn) {
+                const file = new File([blob], 'icebreaker-bingo.png', { type: 'image/png' });
+                const canNativeShare = navigator.canShare && navigator.canShare({ files: [file] });
+                nativeShareBtn.style.display = canNativeShare ? '' : 'none';
+            }
+
             const copied = await copyImageToClipboard(blob);
             const hint = document.getElementById('sharePanelHint');
             if (copied) {
@@ -3771,6 +3785,22 @@
             btn.addEventListener('click', () => {
                 openPlatformShare(btn.dataset.platform);
             });
+        });
+
+        document.getElementById('shareNativeBtn').addEventListener('click', async () => {
+            if (!currentImageBlob) return;
+            try {
+                const file = new File([currentImageBlob], 'icebreaker-bingo.png', { type: 'image/png' });
+                await navigator.share({
+                    files: [file],
+                    title: 'Icebreaker Bingo',
+                    text: getShareText()
+                });
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    showToast('\u26A0\uFE0F', 'Native share failed — try another option');
+                }
+            }
         });
 
         document.getElementById('shareCopyBtn').addEventListener('click', async () => {
