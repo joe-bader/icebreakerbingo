@@ -575,9 +575,10 @@
             max-width: 360px;
             width: 100%;
             padding: 36px 32px 28px;
-            /* Center within the visible gap left of the popup.
-               --coach-area-w is set dynamically from JS. */
-            margin-left: max(0px, calc(var(--coach-area-w, 50vw) / 2 - 180px));
+            /* Centered in the visible gap left of the popup (set via JS).
+               Falls back to viewport-center when gap is too narrow. */
+            margin-left: var(--coach-offset, auto);
+            margin-right: var(--coach-mr, auto);
         }
         .paste-coach-platform {
             font-family: Inter, system-ui, sans-serif;
@@ -3910,18 +3911,20 @@
                 return;
             }
 
-            // Position popup to the right side of the screen, leaving room for paste coach
-            const popupW = 600;
-            const popupH = 550;
+            // Size popup responsively and position to the right side of the screen
             const screenW = window.screen.availWidth || window.screen.width;
             const screenH = window.screen.availHeight || window.screen.height;
-            const left = Math.max(0, screenW - popupW - 40);
+            const popupW = Math.min(600, Math.round(screenW * 0.45));
+            const popupH = Math.min(550, Math.round(screenH * 0.8));
+            const popupMargin = 20;
+            const left = Math.max(0, screenW - popupW - popupMargin);
             const top = Math.max(0, Math.round((screenH - popupH) / 2));
+            const visibleGap = left;
 
             // Close all overlays, then show paste coach in the visible gap
             closeSharePanel();
             closeOverlay();
-            showPasteCoach(platform, left);
+            showPasteCoach(platform, visibleGap);
 
             window.open(url, '_blank', `width=${popupW},height=${popupH},left=${left},top=${top},noreferrer`);
         }
@@ -3930,18 +3933,28 @@
         let pasteCoachTimer = null;
         const PASTE_COACH_DURATION = 12000;
 
-        function showPasteCoach(platform, popupLeft) {
+        function showPasteCoach(platform, visibleGap) {
             const coach = document.getElementById('pasteCoach');
             const isMac = /Mac|iPhone|iPad|iPod/i.test(navigator.platform || navigator.userAgent);
 
-            // Position card centered in the visible area left of the popup
-            const visibleW = popupLeft || Math.round(window.innerWidth * 0.4);
-            coach.style.setProperty('--coach-area-w', `${visibleW}px`);
+            // Position card: center in the visible gap if wide enough,
+            // otherwise center in the full viewport
+            const cardW = 360;
+            const minGap = cardW + 40; // need at least card width + some breathing room
+            if (visibleGap && visibleGap >= minGap) {
+                const offset = Math.round((visibleGap - cardW) / 2);
+                coach.style.setProperty('--coach-offset', `${offset}px`);
+                coach.style.setProperty('--coach-mr', '0');
+            } else {
+                // Narrow screen: center in viewport, coach is seen before/after popup
+                coach.style.setProperty('--coach-offset', 'auto');
+                coach.style.setProperty('--coach-mr', 'auto');
+            }
 
             // Set modifier key for current OS
             document.getElementById('pasteCoachModKey').innerHTML = isMac ? '&#8984;' : 'Ctrl';
             document.getElementById('pasteCoachPlatform').textContent =
-                `Sharing to ${platformNames[platform] || platform}`;
+                `To share to ${platformNames[platform] || platform}`;
             document.getElementById('pasteCoachTarget').textContent =
                 platform === 'x' ? 'post' : platform === 'facebook' ? 'post' : 'message';
 
