@@ -550,11 +550,127 @@
             flex-shrink: 0;
         }
 
+        /* ─── Paste Coach ─── */
+        .paste-coach {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            background: rgba(2, 6, 23, 0.92);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.35s ease, visibility 0.35s ease;
+        }
+        .paste-coach.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .paste-coach-card {
+            text-align: center;
+            max-width: 360px;
+            width: 100%;
+            padding: 36px 32px 28px;
+            /* Center within the visible gap left of the popup.
+               --coach-area-w is set dynamically from JS. */
+            margin-left: max(0px, calc(var(--coach-area-w, 50vw) / 2 - 180px));
+        }
+        .paste-coach-platform {
+            font-family: Inter, system-ui, sans-serif;
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            margin: 0 0 16px;
+        }
+        .paste-coach-keys {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin: 0 0 20px;
+        }
+        .paste-coach-key {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 48px;
+            height: 48px;
+            padding: 0 14px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+            color: var(--text-bright);
+            font-family: Inter, system-ui, sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        .paste-coach-key-plus {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+        .paste-coach-msg {
+            font-family: Inter, system-ui, sans-serif;
+            font-size: 0.95rem;
+            color: var(--text-light);
+            line-height: 1.5;
+            margin: 0 0 24px;
+        }
+        .paste-coach-msg strong {
+            color: var(--text-bright);
+        }
+        .paste-coach-dismiss {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: var(--text-muted);
+            font-family: Inter, system-ui, sans-serif;
+            font-size: 0.78rem;
+            padding: 8px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .paste-coach-dismiss:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+        }
+        .paste-coach-progress {
+            width: 60px;
+            height: 3px;
+            border-radius: 2px;
+            background: rgba(255, 255, 255, 0.08);
+            margin: 16px auto 0;
+            overflow: hidden;
+        }
+        .paste-coach-progress-bar {
+            height: 100%;
+            width: 100%;
+            border-radius: 2px;
+            background: rgba(255, 255, 255, 0.25);
+            transform-origin: left;
+        }
+        .paste-coach.active .paste-coach-progress-bar {
+            animation: pasteCoachCountdown var(--coach-duration, 12s) linear forwards;
+        }
+        @keyframes pasteCoachCountdown {
+            from { transform: scaleX(1); }
+            to { transform: scaleX(0); }
+        }
+
         @media (prefers-reduced-motion: reduce) {
             .share-overlay { transition: opacity 0.15s ease, visibility 0.15s ease; }
             .share-panel { transition: none; transform: none; }
             .platform-btn { transition: none; }
             .platform-btn:hover { transform: none; }
+            .paste-coach { transition: opacity 0.15s ease, visibility 0.15s ease; }
+            .paste-coach.active .paste-coach-progress-bar { animation: none; }
         }
 
         /* ─── Decorative Snowflakes ─── */
@@ -1952,6 +2068,21 @@
         </div>
     </div>
 
+    <!-- Paste Coach (shown behind share popup) -->
+    <div class="paste-coach" id="pasteCoach" aria-live="polite" aria-atomic="true">
+        <div class="paste-coach-card">
+            <p class="paste-coach-platform" id="pasteCoachPlatform"></p>
+            <div class="paste-coach-keys">
+                <span class="paste-coach-key" id="pasteCoachModKey">&#8984;</span>
+                <span class="paste-coach-key-plus">+</span>
+                <span class="paste-coach-key">V</span>
+            </div>
+            <p class="paste-coach-msg">Paste your board image into your <strong id="pasteCoachTarget">post</strong></p>
+            <button class="paste-coach-dismiss" id="pasteCoachDismiss">Got it</button>
+            <div class="paste-coach-progress"><div class="paste-coach-progress-bar"></div></div>
+        </div>
+    </div>
+
     <!-- Toast notification -->
     <!-- Achievement toast -->
     <div class="achievement-toast" id="achievementToast" aria-live="polite" aria-atomic="true">
@@ -3333,6 +3464,11 @@
         // Escape key closes topmost overlay (WCAG 2.1.1)
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
+                const pasteCoach = document.getElementById('pasteCoach');
+                if (pasteCoach.classList.contains('active')) {
+                    dismissPasteCoach();
+                    return;
+                }
                 const shareOverlay = document.getElementById('shareOverlay');
                 if (shareOverlay.classList.contains('active')) {
                     closeSharePanel();
@@ -3751,6 +3887,8 @@
         }
 
         // Platform share handlers
+        const platformNames = { x: 'X', facebook: 'Facebook', whatsapp: 'WhatsApp', email: 'Email' };
+
         function openPlatformShare(platform) {
             const shareText = getShareText();
             const shareUrl = getBoardUrl();
@@ -3765,14 +3903,70 @@
             };
 
             const url = urls[platform];
-            if (url) {
-                if (platform === 'email') {
-                    window.location.href = url;
-                } else {
-                    window.open(url, '_blank', 'width=600,height=500,noopener,noreferrer');
-                }
+            if (!url) return;
+
+            if (platform === 'email') {
+                window.location.href = url;
+                return;
             }
+
+            // Position popup to the right side of the screen, leaving room for paste coach
+            const popupW = 600;
+            const popupH = 550;
+            const screenW = window.screen.availWidth || window.screen.width;
+            const screenH = window.screen.availHeight || window.screen.height;
+            const left = Math.max(0, screenW - popupW - 40);
+            const top = Math.max(0, Math.round((screenH - popupH) / 2));
+
+            // Close all overlays, then show paste coach in the visible gap
+            closeSharePanel();
+            closeOverlay();
+            showPasteCoach(platform, left);
+
+            window.open(url, '_blank', `width=${popupW},height=${popupH},left=${left},top=${top},noreferrer`);
         }
+
+        // Paste coach
+        let pasteCoachTimer = null;
+        const PASTE_COACH_DURATION = 12000;
+
+        function showPasteCoach(platform, popupLeft) {
+            const coach = document.getElementById('pasteCoach');
+            const isMac = /Mac|iPhone|iPad|iPod/i.test(navigator.platform || navigator.userAgent);
+
+            // Position card centered in the visible area left of the popup
+            const visibleW = popupLeft || Math.round(window.innerWidth * 0.4);
+            coach.style.setProperty('--coach-area-w', `${visibleW}px`);
+
+            // Set modifier key for current OS
+            document.getElementById('pasteCoachModKey').innerHTML = isMac ? '&#8984;' : 'Ctrl';
+            document.getElementById('pasteCoachPlatform').textContent =
+                `Sharing to ${platformNames[platform] || platform}`;
+            document.getElementById('pasteCoachTarget').textContent =
+                platform === 'x' ? 'post' : platform === 'facebook' ? 'post' : 'message';
+
+            // Reset animation
+            coach.style.setProperty('--coach-duration', `${PASTE_COACH_DURATION}ms`);
+            const bar = coach.querySelector('.paste-coach-progress-bar');
+            bar.style.animation = 'none';
+            bar.offsetHeight; // trigger reflow
+            bar.style.animation = '';
+
+            coach.classList.add('active');
+
+            clearTimeout(pasteCoachTimer);
+            pasteCoachTimer = setTimeout(dismissPasteCoach, PASTE_COACH_DURATION);
+        }
+
+        function dismissPasteCoach() {
+            clearTimeout(pasteCoachTimer);
+            document.getElementById('pasteCoach').classList.remove('active');
+        }
+
+        document.getElementById('pasteCoachDismiss').addEventListener('click', dismissPasteCoach);
+        document.getElementById('pasteCoach').addEventListener('click', (e) => {
+            if (e.target.id === 'pasteCoach') dismissPasteCoach();
+        });
 
         // Share panel event listeners
         document.getElementById('sharePanelClose').addEventListener('click', closeSharePanel);
