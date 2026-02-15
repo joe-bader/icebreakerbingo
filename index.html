@@ -3631,19 +3631,34 @@
         // ─── Challenge Link Support ───
         function getBoardUrl() {
             if (!currentSeed) return SHARE_URL;
-            let url = `${SHARE_URL}?b=${currentSeed}&t=${currentTheme}`;
             // Encode checked cells as a bitmask
             const bits = cells.map(c => c ? '1' : '0').join('');
             const packed = parseInt(bits, 2).toString(36);
-            url += `&c=${packed}`;
-            return url;
+            // Use path-based URL: /b/SEED.THEME.CELLS
+            return `${SHARE_URL}/b/${currentSeed}.${currentTheme}.${packed}`;
         }
 
         function loadFromUrl() {
-            const params = new URLSearchParams(window.location.search);
-            const seed = params.get('b');
-            const theme = params.get('t');
-            const checkedParam = params.get('c');
+            let seed, theme, checkedParam;
+
+            // Check for path stored by 404.html redirect (GitHub Pages)
+            const redirectPath = sessionStorage.getItem('redirect_path');
+            if (redirectPath) sessionStorage.removeItem('redirect_path');
+            const pathToCheck = redirectPath || window.location.pathname;
+
+            // Try path-based URL first: /b/SEED.THEME.CELLS
+            const pathMatch = pathToCheck.match(/^\/b\/([^.]+)\.([^.]+)\.([^.]+)/);
+            if (pathMatch) {
+                seed = pathMatch[1];
+                theme = pathMatch[2];
+                checkedParam = pathMatch[3];
+            } else {
+                // Fall back to query params for backward compatibility
+                const params = new URLSearchParams(window.location.search);
+                seed = params.get('b');
+                theme = params.get('t');
+                checkedParam = params.get('c');
+            }
 
             if (seed) {
                 currentSeed = parseInt(seed, 10);
@@ -3726,9 +3741,9 @@
             const headerSubtitle = document.querySelector('.header p');
             headerSubtitle.textContent = DEFAULT_SUBTITLE;
 
-            // Clear challenger data and URL params
+            // Clear challenger data and URL
             window._challengerCells = null;
-            history.replaceState({}, '', window.location.pathname);
+            history.replaceState({}, '', '/');
         }
 
         // ─── Share Panel Logic ───
