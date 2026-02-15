@@ -2726,7 +2726,7 @@
 
         // ─── Sound System ───
         const storedSound = localStorage.getItem('ib_sound');
-        let soundEnabled = storedSound === 'on';
+        let soundEnabled = storedSound !== 'off';
         const audioCtx = typeof AudioContext !== 'undefined' ? new AudioContext() : null;
 
         function playTone(freq, duration, type = 'sine', volume = 0.15) {
