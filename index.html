@@ -397,7 +397,7 @@
             border: 1px solid rgba(148, 163, 184, 0.15);
             border-radius: 20px;
             padding: 32px 28px 28px;
-            max-width: 400px;
+            max-width: 440px;
             width: 90vw;
             box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(148, 163, 184, 0.06);
             transform: translateY(24px) scale(0.96);
@@ -510,8 +510,11 @@
 
         /* Brand hover colors */
         .platform-btn[data-platform="x"]:hover { border-color: #a8a8a8; box-shadow: 0 4px 16px rgba(168, 168, 168, 0.15); }
+        .platform-btn[data-platform="threads"]:hover { border-color: #a8a8a8; box-shadow: 0 4px 16px rgba(168, 168, 168, 0.15); }
         .platform-btn[data-platform="facebook"]:hover { border-color: #1877F2; box-shadow: 0 4px 16px rgba(24, 119, 242, 0.2); }
+        .platform-btn[data-platform="instagram"]:hover { border-color: #E1306C; box-shadow: 0 4px 16px rgba(225, 48, 108, 0.2); }
         .platform-btn[data-platform="whatsapp"]:hover { border-color: #25D366; box-shadow: 0 4px 16px rgba(37, 211, 102, 0.2); }
+        .platform-btn[data-platform="linkedin"]:hover { border-color: #0A66C2; box-shadow: 0 4px 16px rgba(10, 102, 194, 0.2); }
         .platform-btn[data-platform="email"]:hover { border-color: #f59e0b; box-shadow: 0 4px 16px rgba(245, 158, 11, 0.15); }
 
         /* Secondary actions grid */
@@ -627,6 +630,34 @@
         .paste-coach-msg strong {
             color: var(--text-bright);
         }
+        /* Loading / instructions phase transitions */
+        .paste-coach-loading {
+            transition: opacity 0.4s ease;
+        }
+        .paste-coach-loading.fade-out {
+            opacity: 0;
+        }
+        .paste-coach-instructions {
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .paste-coach-instructions.fade-in {
+            opacity: 1;
+        }
+        /* Animated ellipsis */
+        .animated-ellipsis::after {
+            content: '';
+            display: inline-block;
+            width: 1.2em;
+            text-align: left;
+            animation: ellipsis 1.4s steps(4, end) infinite;
+        }
+        @keyframes ellipsis {
+            0%  { content: ''; }
+            25% { content: '.'; }
+            50% { content: '..'; }
+            75% { content: '...'; }
+        }
         .paste-coach-dismiss {
             background: rgba(255, 255, 255, 0.06);
             border: 1px solid rgba(255, 255, 255, 0.12);
@@ -642,36 +673,15 @@
             background: rgba(255, 255, 255, 0.1);
             color: var(--text-light);
         }
-        .paste-coach-progress {
-            width: 60px;
-            height: 3px;
-            border-radius: 2px;
-            background: rgba(255, 255, 255, 0.08);
-            margin: 16px auto 0;
-            overflow: hidden;
-        }
-        .paste-coach-progress-bar {
-            height: 100%;
-            width: 100%;
-            border-radius: 2px;
-            background: rgba(255, 255, 255, 0.25);
-            transform-origin: left;
-        }
-        .paste-coach.active .paste-coach-progress-bar {
-            animation: pasteCoachCountdown var(--coach-duration, 12s) linear forwards;
-        }
-        @keyframes pasteCoachCountdown {
-            from { transform: scaleX(1); }
-            to { transform: scaleX(0); }
-        }
-
         @media (prefers-reduced-motion: reduce) {
             .share-overlay { transition: opacity 0.15s ease, visibility 0.15s ease; }
             .share-panel { transition: none; transform: none; }
             .platform-btn { transition: none; }
             .platform-btn:hover { transform: none; }
             .paste-coach { transition: opacity 0.15s ease, visibility 0.15s ease; }
-            .paste-coach.active .paste-coach-progress-bar { animation: none; }
+            .paste-coach-loading, .paste-coach-instructions { transition: none; }
+            .animated-ellipsis::after { animation: none; content: '...'; }
+        
         }
 
         /* ─── Decorative Snowflakes ─── */
@@ -1069,6 +1079,64 @@
             display: flex;
             gap: 8px;
             align-items: center;
+        }
+
+        /* ─── Challenge Viewer Mode ─── */
+        .challenge-viewer .theme-picker,
+        .challenge-viewer .hud-row,
+        .challenge-viewer .board-actions { display: none; }
+        .challenge-viewer .grid-cell { pointer-events: none; cursor: default; }
+
+        .challenge-banner {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+        .challenge-viewer .challenge-banner { display: flex; }
+
+        .challenge-banner p {
+            font-size: 1.05rem;
+            color: var(--text-light);
+            line-height: 1.5;
+            margin: 0;
+        }
+        .challenge-banner strong {
+            color: var(--text-bright);
+        }
+
+        .challenge-cta {
+            font-family: 'Fredoka', 'Inter', sans-serif;
+            padding: 0.85rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--focus-ring), #0ea5e9);
+            color: var(--bg-deep);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all var(--transition);
+            box-shadow:
+                0 4px 0 #0369a1,
+                0 6px 20px rgba(56, 189, 248, 0.35);
+        }
+        .challenge-cta:hover {
+            transform: translateY(-2px);
+            box-shadow:
+                0 6px 0 #0369a1,
+                0 10px 30px rgba(56, 189, 248, 0.45);
+        }
+        .challenge-cta:focus-visible {
+            outline: 3px solid var(--text-bright);
+            outline-offset: 2px;
+        }
+        .challenge-cta:active {
+            transform: translateY(2px);
+            box-shadow:
+                0 1px 0 #0369a1,
+                0 2px 8px rgba(56, 189, 248, 0.25);
         }
 
         /* ─── Share Button ─── */
@@ -1984,6 +2052,12 @@
                     Share
                 </button>
             </div>
+
+            <!-- Challenge Link Landing Banner -->
+            <div class="challenge-banner" id="challengeBanner">
+                <p id="challengeMessage"></p>
+                <button class="challenge-cta" id="challengeCta">Play Icebreaker Bingo</button>
+            </div>
         </main>
 
         <!-- Right Sidebar Ad -->
@@ -2032,15 +2106,30 @@
                     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                     <span class="platform-label">X</span>
                 </button>
+                <!-- Threads -->
+                <button class="platform-btn" data-platform="threads" aria-label="Share on Threads">
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.186 24h-.007c-3.581-.024-6.334-1.205-8.184-3.509C2.35 18.44 1.5 15.586 1.472 12.01v-.017c.03-3.579.879-6.43 2.525-8.482C5.845 1.205 8.6.024 12.18 0h.014c2.746.02 5.043.725 6.826 2.098 1.677 1.29 2.858 3.13 3.509 5.467l-2.04.569c-1.104-3.96-3.898-5.984-8.304-6.015-2.91.022-5.11.936-6.54 2.717C4.307 6.504 3.616 8.914 3.59 12c.025 3.086.718 5.496 2.057 7.164 1.432 1.783 3.631 2.698 6.54 2.717 2.623-.02 4.358-.631 5.8-2.045 1.647-1.613 1.618-3.593 1.09-4.798-.31-.71-.873-1.3-1.634-1.75-.192 1.352-.622 2.446-1.284 3.272-.886 1.102-2.14 1.704-3.73 1.79-1.202.065-2.361-.218-3.259-.801-1.063-.689-1.685-1.74-1.752-2.96-.065-1.18.408-2.26 1.332-3.04.88-.744 2.107-1.17 3.546-1.23 1.078-.046 2.06.08 2.94.353-.08-.94-.38-1.672-.91-2.164-.62-.576-1.538-.862-2.726-.862h-.07c-.94.013-1.753.295-2.418.84l-1.345-1.56c.957-.784 2.142-1.2 3.521-1.24h.108c1.722 0 3.1.488 4.097 1.45.912.882 1.428 2.1 1.54 3.624.38.2.734.428 1.06.686 1.073.85 1.835 1.97 2.207 3.24.538 1.84.378 4.1-1.428 5.878-1.87 1.838-4.127 2.609-7.322 2.632zM14.1 13.98c-.789-.034-2.467.088-2.667 1.776-.087.733.3 1.504 1.81 1.504.068 0 .139-.002.21-.006 1.564-.085 2.2-1.378 2.367-2.727-.524-.236-1.103-.42-1.72-.547z"/></svg>
+                    <span class="platform-label">Threads</span>
+                </button>
                 <!-- Facebook -->
                 <button class="platform-btn" data-platform="facebook" aria-label="Share on Facebook">
                     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
                     <span class="platform-label">Facebook</span>
                 </button>
+                <!-- Instagram -->
+                <button class="platform-btn" data-platform="instagram" aria-label="Share on Instagram">
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                    <span class="platform-label">Instagram</span>
+                </button>
                 <!-- WhatsApp -->
                 <button class="platform-btn" data-platform="whatsapp" aria-label="Share on WhatsApp">
                     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
                     <span class="platform-label">WhatsApp</span>
+                </button>
+                <!-- LinkedIn -->
+                <button class="platform-btn" data-platform="linkedin" aria-label="Share on LinkedIn">
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                    <span class="platform-label">LinkedIn</span>
                 </button>
                 <!-- Email -->
                 <button class="platform-btn" data-platform="email" aria-label="Share via Email">
@@ -2073,14 +2162,33 @@
     <div class="paste-coach" id="pasteCoach" aria-live="polite" aria-atomic="true">
         <div class="paste-coach-card">
             <p class="paste-coach-platform" id="pasteCoachPlatform"></p>
-            <div class="paste-coach-keys">
-                <span class="paste-coach-key" id="pasteCoachModKey">&#8984;</span>
-                <span class="paste-coach-key-plus">+</span>
-                <span class="paste-coach-key">V</span>
+
+            <!-- Phase 1: Loading state -->
+            <div class="paste-coach-loading" id="pasteCoachLoading">
+                <p class="paste-coach-msg">Opening <strong id="pasteCoachLoadingName">Facebook</strong><span class="animated-ellipsis"></span></p>
             </div>
-            <p class="paste-coach-msg">Paste your board image into your <strong id="pasteCoachTarget">post</strong></p>
+
+            <!-- Phase 2a: Paste instructions (X, Facebook, Threads, WhatsApp) -->
+            <div class="paste-coach-instructions" id="pasteCoachPasteMode">
+                <div class="paste-coach-keys">
+                    <span class="paste-coach-key" id="pasteCoachModKey">&#8984;</span>
+                    <span class="paste-coach-key-plus">+</span>
+                    <span class="paste-coach-key">V</span>
+                </div>
+                <p class="paste-coach-msg">Paste your board image into your <strong id="pasteCoachTarget">post</strong></p>
+            </div>
+
+            <!-- Phase 2b: Upload instructions (Instagram) -->
+            <div class="paste-coach-instructions" id="pasteCoachUploadMode">
+                <p class="paste-coach-msg">Your board image has been saved to Downloads. Attach it to your post for the full effect.</p>
+            </div>
+
+            <!-- Phase 2c: Link-only instructions (LinkedIn) -->
+            <div class="paste-coach-instructions" id="pasteCoachLinkMode">
+                <p class="paste-coach-msg">Add a comment and share the link. A preview of the game will be included automatically.</p>
+            </div>
+
             <button class="paste-coach-dismiss" id="pasteCoachDismiss">Got it</button>
-            <div class="paste-coach-progress"><div class="paste-coach-progress-bar"></div></div>
         </div>
     </div>
 
@@ -3589,6 +3697,40 @@
             announce(msg);
         }
 
+        // ─── Challenge Landing CTA ───
+        function startOwnBoard() {
+            // Exit challenge viewer mode
+            const mainEl = document.getElementById('bingo-game');
+            mainEl.classList.remove('challenge-viewer');
+
+            // Reset cells
+            for (let i = 0; i < 25; i++) cells[i] = false;
+            cells[12] = true; // free space
+
+            // Generate a fresh random board
+            currentSeed = Math.floor(Math.random() * 2147483646) + 1;
+            isDailyMode = false;
+            initBoard();
+
+            // Rebuild grid
+            grid.innerHTML = '';
+            createGrid();
+
+            // Reset wins and patterns
+            wins = 0;
+            completedPatterns.clear();
+            hitMilestones.clear();
+            document.getElementById('winsCount').textContent = wins;
+
+            // Restore header subtitle
+            const headerSubtitle = document.querySelector('.header p');
+            headerSubtitle.textContent = DEFAULT_SUBTITLE;
+
+            // Clear challenger data and URL params
+            window._challengerCells = null;
+            history.replaceState({}, '', window.location.pathname);
+        }
+
         // ─── Share Panel Logic ───
 
         function getShareText() {
@@ -3806,11 +3948,11 @@
             wrapper.appendChild(boardClone);
 
             const cta = document.createElement('div');
-            cta.textContent = 'Play at icebreakerbingo.com';
             cta.style.cssText = `
-                font-family: Fredoka, Inter, system-ui, sans-serif;
-                font-size: 14px; font-weight: 600; color: #94a3b8;
-                text-align: center; padding-top: 2px;
+                text-align: center; padding-top: 4px;
+            `;
+            cta.innerHTML = `
+                <span style="font-family: Inter, system-ui, sans-serif; font-size: 13px; font-weight: 500; color: #64748b;">Play yours at </span><span style="font-family: Fredoka, Inter, system-ui, sans-serif; font-size: 16px; font-weight: 700; color: #e2e8f0;">icebreakerbingo.com</span>
             `;
             wrapper.appendChild(cta);
 
@@ -3888,7 +4030,11 @@
         }
 
         // Platform share handlers
-        const platformNames = { x: 'X', facebook: 'Facebook', whatsapp: 'WhatsApp', email: 'Email' };
+        const platformNames = {
+            x: 'X', threads: 'Threads', facebook: 'Facebook',
+            instagram: 'Instagram', whatsapp: 'WhatsApp',
+            linkedin: 'LinkedIn', email: 'Email'
+        };
 
         function openPlatformShare(platform) {
             const shareText = getShareText();
@@ -3898,8 +4044,11 @@
 
             const urls = {
                 x: `https://x.com/intent/post?text=${encodedText}&url=${encodedUrl}`,
+                threads: `https://www.threads.net/intent/post?text=${encodedText}%20${encodedUrl}`,
                 facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}&quote=${encodedText}`,
+                instagram: 'https://www.instagram.com',
                 whatsapp: `https://wa.me/?text=${encodedText}%20${encodedUrl}`,
+                linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
                 email: `mailto:?subject=${encodeURIComponent('Icebreaker Bingo')}&body=${encodedText}%0A%0A${encodedUrl}`
             };
 
@@ -3909,6 +4058,12 @@
             if (platform === 'email') {
                 window.location.href = url;
                 return;
+            }
+
+            // Auto-download image for platforms that need manual upload
+            const isUploadFlow = platform === 'instagram';
+            if (isUploadFlow && currentImageBlob) {
+                downloadImage(currentImageBlob);
             }
 
             // Size popup responsively and position to the right side of the screen
@@ -3930,50 +4085,88 @@
         }
 
         // Paste coach
-        let pasteCoachTimer = null;
-        const PASTE_COACH_DURATION = 12000;
+        let pasteCoachActive = false;
+        let pasteCoachRevealTimer = null;
+        const PASTE_COACH_REVEAL_DELAY = 2500;
+
+        function onWindowFocus() {
+            if (pasteCoachActive) dismissPasteCoach();
+        }
 
         function showPasteCoach(platform, visibleGap) {
             const coach = document.getElementById('pasteCoach');
+            const loadingEl = document.getElementById('pasteCoachLoading');
+            const pasteMode = document.getElementById('pasteCoachPasteMode');
+            const uploadMode = document.getElementById('pasteCoachUploadMode');
+            const linkMode = document.getElementById('pasteCoachLinkMode');
+            const allModes = [pasteMode, uploadMode, linkMode];
             const isMac = /Mac|iPhone|iPad|iPod/i.test(navigator.platform || navigator.userAgent);
+
+            // Determine which instruction mode to show
+            let revealMode;
+            if (platform === 'instagram') {
+                revealMode = uploadMode;
+            } else if (platform === 'linkedin') {
+                revealMode = linkMode;
+            } else {
+                revealMode = pasteMode;
+            }
 
             // Position card: center in the visible gap if wide enough,
             // otherwise center in the full viewport
             const cardW = 360;
-            const minGap = cardW + 40; // need at least card width + some breathing room
+            const minGap = cardW + 40;
             if (visibleGap && visibleGap >= minGap) {
                 const offset = Math.round((visibleGap - cardW) / 2);
                 coach.style.setProperty('--coach-offset', `${offset}px`);
                 coach.style.setProperty('--coach-mr', '0');
             } else {
-                // Narrow screen: center in viewport, coach is seen before/after popup
                 coach.style.setProperty('--coach-offset', 'auto');
                 coach.style.setProperty('--coach-mr', 'auto');
             }
 
-            // Set modifier key for current OS
-            document.getElementById('pasteCoachModKey').innerHTML = isMac ? '&#8984;' : 'Ctrl';
+            // Populate text content
+            const name = platformNames[platform] || platform;
             document.getElementById('pasteCoachPlatform').textContent =
-                `To share to ${platformNames[platform] || platform}`;
-            document.getElementById('pasteCoachTarget').textContent =
-                platform === 'x' ? 'post' : platform === 'facebook' ? 'post' : 'message';
+                `To share your board to ${name}`;
+            document.getElementById('pasteCoachLoadingName').textContent = name;
 
-            // Reset animation
-            coach.style.setProperty('--coach-duration', `${PASTE_COACH_DURATION}ms`);
-            const bar = coach.querySelector('.paste-coach-progress-bar');
-            bar.style.animation = 'none';
-            bar.offsetHeight; // trigger reflow
-            bar.style.animation = '';
+            if (revealMode === pasteMode) {
+                document.getElementById('pasteCoachModKey').innerHTML = isMac ? '&#8984;' : 'Ctrl';
+                const targetWord = (platform === 'x' || platform === 'threads' ||
+                    platform === 'facebook') ? 'post' : 'message';
+                document.getElementById('pasteCoachTarget').textContent = targetWord;
+            }
+
+            // Reset phases: show loading, hide all instruction modes
+            loadingEl.classList.remove('fade-out');
+            loadingEl.style.display = '';
+            allModes.forEach(m => { m.classList.remove('fade-in'); m.style.display = 'none'; });
 
             coach.classList.add('active');
+            pasteCoachActive = true;
 
-            clearTimeout(pasteCoachTimer);
-            pasteCoachTimer = setTimeout(dismissPasteCoach, PASTE_COACH_DURATION);
+            // After delay, crossfade from loading to the appropriate instructions
+            clearTimeout(pasteCoachRevealTimer);
+            pasteCoachRevealTimer = setTimeout(() => {
+                loadingEl.classList.add('fade-out');
+
+                revealMode.style.display = '';
+                revealMode.offsetHeight; // trigger reflow
+                revealMode.classList.add('fade-in');
+
+                setTimeout(() => { loadingEl.style.display = 'none'; }, 400);
+            }, PASTE_COACH_REVEAL_DELAY);
+
+            // Dismiss when user returns to this window (after closing/leaving the popup)
+            window.addEventListener('focus', onWindowFocus);
         }
 
         function dismissPasteCoach() {
-            clearTimeout(pasteCoachTimer);
+            pasteCoachActive = false;
+            clearTimeout(pasteCoachRevealTimer);
             document.getElementById('pasteCoach').classList.remove('active');
+            window.removeEventListener('focus', onWindowFocus);
         }
 
         document.getElementById('pasteCoachDismiss').addEventListener('click', dismissPasteCoach);
@@ -4064,6 +4257,8 @@
         buildThemePicker();
         applyVisualTheme(currentTheme);
 
+        const DEFAULT_SUBTITLE = 'Check every square that sounds like you, then share it!';
+
         // Check for challenge link in URL
         const fromUrl = loadFromUrl();
         if (!fromUrl) {
@@ -4073,23 +4268,37 @@
             initBoard();
         }
 
+        // Pre-fill sharer's cells if arriving from a challenge link
+        if (window._challengerCells) {
+            for (let i = 0; i < 25; i++) {
+                cells[i] = window._challengerCells[i];
+            }
+            cells[12] = true; // free space always checked
+        }
+
         createGrid();
         document.getElementById('winsCount').textContent = wins;
         suppressTitleToast = false;
 
-        // Show compare button if this is a challenge link with opponent data
+        // Activate challenge viewer mode if challenger data exists
         if (window._challengerCells) {
-            const compareBtn = document.createElement('button');
-            compareBtn.className = 'reset-btn';
-            compareBtn.innerHTML = `
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
-                    <path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                </svg>
-                Compare
-            `;
-            compareBtn.addEventListener('click', showComparison);
-            document.querySelector('.board-actions').appendChild(compareBtn);
+            const mainEl = document.getElementById('bingo-game');
+            mainEl.classList.add('challenge-viewer');
+
+            // Calculate sharer's stats
+            const challengerChecked = window._challengerCells.filter((v, i) => v && i !== 12).length;
+            const challengerTitle = getTitle(challengerChecked);
+
+            // Update header subtitle
+            const headerSubtitle = document.querySelector('.header p');
+            headerSubtitle.textContent = '';
+            headerSubtitle.innerHTML = `Your friend is a <strong>${challengerTitle}</strong>! They checked <strong>${challengerChecked}/24</strong> squares.`;
+
+            // Show challenge banner with CTA
+            const banner = document.getElementById('challengeBanner');
+            document.getElementById('challengeMessage').innerHTML =
+                'Think you can do better? Start your own board!';
+            document.getElementById('challengeCta').addEventListener('click', startOwnBoard);
         }
     </script>
 </body>
