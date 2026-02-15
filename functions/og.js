@@ -16,67 +16,42 @@ export async function onRequest(context) {
     if (cachedResponse) return cachedResponse;
 
     try {
-        // Reconstruct board state
         const { shuffled, cells, checked, title } = reconstructBoard(boardId);
 
-        // Build the 5x5 grid as a flat row of 25 cells
-        const cellSize = 218;
-        const cellHeight = 90;
-        const gridGap = 6;
-
-        const gridCells = [];
+        // Build 5 rows of 5 cells each
         let promptIdx = 0;
-        for (let i = 0; i < 25; i++) {
-            const row = Math.floor(i / 5);
-            const col = i % 5;
-            const isCenter = i === 12;
-            const isChecked = cells[i];
-            const text = isCenter ? 'FREE' : shuffled[promptIdx++];
+        const rows = [];
+        for (let r = 0; r < 5; r++) {
+            const rowCells = [];
+            for (let c = 0; c < 5; c++) {
+                const i = r * 5 + c;
+                const isCenter = i === 12;
+                const isChecked = cells[i];
+                const text = isCenter ? 'FREE' : shuffled[promptIdx++];
 
-            const bg = isChecked ? '#1e3a5f' : '#141e30';
-            const borderColor = isChecked ? '#38bdf8' : '#1e293b';
-            const color = isChecked ? '#e2e8f0' : '#94a3b8';
-            const fontSize = isCenter ? '24px' : '11px';
-            const fontWeight = isCenter ? '700' : '400';
+                const bg = isChecked ? '#1e3a5f' : '#141e30';
+                const borderColor = isChecked ? '#38bdf8' : '#1e293b';
+                const color = isChecked ? '#e2e8f0' : '#94a3b8';
+                const fontSize = isCenter ? '22px' : '11px';
+                const fontWeight = isCenter ? '700' : '400';
 
-            const left = col * (cellSize + gridGap);
-            const top = row * (cellHeight + gridGap);
-
-            gridCells.push(
-                `<div style="position:absolute;left:${left}px;top:${top}px;width:${cellSize}px;height:${cellHeight}px;display:flex;align-items:center;justify-content:center;background:${bg};border:2px solid ${borderColor};border-radius:8px;padding:4px;font-size:${fontSize};font-weight:${fontWeight};color:${color};overflow:hidden;text-align:center;">${text}</div>`
+                rowCells.push(
+                    `<div style="display:flex;align-items:center;justify-content:center;width:214px;height:88px;background:${bg};border:2px solid ${borderColor};border-radius:8px;font-size:${fontSize};font-weight:${fontWeight};color:${color};text-align:center;padding:4px;margin:3px;">${text}</div>`
+                );
+            }
+            rows.push(
+                `<div style="display:flex;flex-direction:row;">${rowCells.join('')}</div>`
             );
         }
 
-        const gridWidth = 5 * cellSize + 4 * gridGap;
-        const gridHeight = 5 * cellHeight + 4 * gridGap;
-
-        const html = `
-            <div style="display:flex;flex-direction:column;align-items:center;width:1200px;height:630px;background:#0b1628;padding:28px 0;font-family:Arial,sans-serif;">
-                <div style="display:flex;align-items:center;justify-content:space-between;width:${gridWidth}px;margin-bottom:12px;">
-                    <div style="display:flex;flex-direction:column;">
-                        <div style="font-size:26px;font-weight:700;color:#f1f5f9;">Icebreaker Bingo</div>
-                        <div style="font-size:15px;color:#64748b;margin-top:2px;">${checked}/24 checked</div>
-                    </div>
-                    <div style="display:flex;align-items:center;background:#172a45;border:2px solid #2563eb;border-radius:50px;padding:6px 18px;">
-                        <span style="font-size:16px;font-weight:600;color:#38bdf8;">${title}</span>
-                    </div>
-                </div>
-                <div style="display:flex;position:relative;width:${gridWidth}px;height:${gridHeight}px;">
-                    ${gridCells.join('')}
-                </div>
-                <div style="display:flex;margin-top:10px;">
-                    <span style="font-size:14px;color:#64748b;">Play yours at </span>
-                    <span style="font-size:15px;font-weight:700;color:#e2e8f0;margin-left:6px;">icebreakerbingo.com</span>
-                </div>
-            </div>
-        `;
+        const html = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:1200px;height:630px;background:#0b1628;font-family:Arial,sans-serif;"><div style="display:flex;flex-direction:row;align-items:center;justify-content:space-between;width:1110px;margin-bottom:10px;"><div style="display:flex;flex-direction:column;"><div style="display:flex;font-size:26px;font-weight:700;color:#f1f5f9;">Icebreaker Bingo</div><div style="display:flex;font-size:14px;color:#64748b;margin-top:2px;">${checked}/24 checked</div></div><div style="display:flex;align-items:center;background:#172a45;border:2px solid #2563eb;border-radius:50px;padding:6px 18px;"><div style="display:flex;font-size:16px;font-weight:600;color:#38bdf8;">${title}</div></div></div><div style="display:flex;flex-direction:column;align-items:center;">${rows.join('')}</div><div style="display:flex;flex-direction:row;margin-top:8px;"><div style="display:flex;font-size:13px;color:#64748b;margin-right:6px;">Play yours at</div><div style="display:flex;font-size:14px;font-weight:700;color:#e2e8f0;">icebreakerbingo.com</div></div></div>`;
 
         const imgResponse = new ImageResponse(html, {
             width: 1200,
             height: 630,
         });
 
-        // Buffer the entire image before returning (avoids streaming issues)
+        // Buffer the entire image before returning
         const buffer = await imgResponse.arrayBuffer();
 
         const cacheResponse = new Response(buffer, {
