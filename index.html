@@ -3565,16 +3565,50 @@
             `;
             wrapper.appendChild(title);
 
-            // Stats banner
+            // Stats banner — styled scoreboard matching the on-site HUD
             const checked = cells.filter((v, i) => v && i !== 12).length;
-            const statsLine = document.createElement('div');
-            statsLine.textContent = `Checked: ${checked}/24  |  Bingos: ${wins}  |  ${getTitle(checked)}`;
-            statsLine.style.cssText = `
-                font-family: Inter, system-ui, sans-serif;
-                font-size: 12px; font-weight: 600; color: #94a3b8;
-                text-align: center; letter-spacing: 0.02em;
+
+            const labelCss = 'font-family: Inter, system-ui, sans-serif; font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.08em; line-height: 1;';
+            const valueCss = "font-family: 'DSEG7', Fredoka, monospace; font-size: 20px; font-weight: bold; color: #38bdf8; line-height: 1; text-shadow: 0 0 8px rgba(56,189,248,0.5), 0 0 20px rgba(56,189,248,0.2);";
+            const suffixCss = 'font-family: Inter, system-ui, sans-serif; font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.25); line-height: 1; margin-left: -2px;';
+            const itemCss = 'display: flex; align-items: center; gap: 6px; padding: 7px 16px;';
+            const dividerCss = 'width: 1px; height: 20px; background: rgba(255,255,255,0.08); flex-shrink: 0;';
+
+            const statsBar = document.createElement('div');
+            statsBar.style.cssText = `
+                display: inline-flex; align-items: center;
+                background: rgba(0,0,0,0.35);
+                border: 1px solid rgba(255,255,255,0.08);
+                border-radius: 10px; padding: 0;
+                box-shadow: inset 0 2px 6px rgba(0,0,0,0.4), inset 0 0 1px rgba(0,0,0,0.3);
             `;
-            wrapper.appendChild(statsLine);
+            statsBar.innerHTML = `
+                <div style="${itemCss}">
+                    <span style="${labelCss}">Checked</span>
+                    <span style="${valueCss}">${checked}</span>
+                    <span style="${suffixCss}">/24</span>
+                </div>
+                <div style="${dividerCss}"></div>
+                <div style="${itemCss}">
+                    <span style="${labelCss}">Bingos</span>
+                    <span style="${valueCss}">${wins}</span>
+                </div>
+            `;
+            wrapper.appendChild(statsBar);
+
+            // Personality title badge
+            const titleBadge = document.createElement('div');
+            titleBadge.style.cssText = `
+                font-family: Fredoka, Inter, system-ui, sans-serif;
+                font-size: 14px; font-weight: 600; color: #e2e8f0;
+                background: rgba(255,255,255,0.06);
+                border: 1px solid rgba(255,255,255,0.08);
+                border-radius: 20px; padding: 4px 18px;
+                text-align: center; letter-spacing: 0.02em;
+                margin-top: -6px;
+            `;
+            titleBadge.textContent = getTitle(checked);
+            wrapper.appendChild(titleBadge);
 
             const boardClone = boardEl.cloneNode(true);
             boardClone.style.background = getComputedStyle(document.body).getPropertyValue('--bg-mid').trim();
