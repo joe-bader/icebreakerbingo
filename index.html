@@ -2183,9 +2183,9 @@
                 <p class="paste-coach-msg">Your board image has been saved to Downloads. Attach it to your post for the full effect.</p>
             </div>
 
-            <!-- Phase 2c: Link-only instructions (LinkedIn) -->
+            <!-- Phase 2c: Link instructions (LinkedIn) -->
             <div class="paste-coach-instructions" id="pasteCoachLinkMode">
-                <p class="paste-coach-msg">Add a comment and share the link. A preview of the game will be included automatically.</p>
+                <p class="paste-coach-msg">Your board link is attached. Add a comment and post to share your board with friends!</p>
             </div>
 
             <button class="paste-coach-dismiss" id="pasteCoachDismiss">Got it</button>
@@ -3629,36 +3629,53 @@
         }
 
         // ─── Challenge Link Support ───
+        const THEME_KEYS = ['classic', 'work', 'friends', 'family', 'dating'];
+
+        function encodeBoardId(seed, theme, cellsArr) {
+            const s = seed.toString(36).padStart(6, '0');
+            const t = THEME_KEYS.indexOf(theme);
+            const bits = cellsArr.map(c => c ? '1' : '0').join('');
+            const c = parseInt(bits, 2).toString(36).padStart(5, '0');
+            return s + t + c;
+        }
+
+        function decodeBoardId(id) {
+            const seed = parseInt(id.slice(0, 6), 36);
+            const theme = THEME_KEYS[parseInt(id[6], 10)];
+            const cellsNum = parseInt(id.slice(7, 12), 36);
+            const bits = cellsNum.toString(2).padStart(25, '0');
+            const decodedCells = bits.split('').map(b => b === '1');
+            return { seed, theme, cells: decodedCells };
+        }
+
         function getBoardUrl() {
             if (!currentSeed) return SHARE_URL;
-            // Encode checked cells as a bitmask
-            const bits = cells.map(c => c ? '1' : '0').join('');
-            const packed = parseInt(bits, 2).toString(36);
-            // Use path-based URL: /b/SEED.THEME.CELLS
-            return `${SHARE_URL}/b/${currentSeed}.${currentTheme}.${packed}`;
+            const id = encodeBoardId(currentSeed, currentTheme, cells);
+            return `${SHARE_URL}?g=${id}`;
         }
 
         function loadFromUrl() {
-            let seed, theme, checkedParam;
+            const params = new URLSearchParams(window.location.search);
 
-            // Check for path stored by 404.html redirect (GitHub Pages)
-            const redirectPath = sessionStorage.getItem('redirect_path');
-            if (redirectPath) sessionStorage.removeItem('redirect_path');
-            const pathToCheck = redirectPath || window.location.pathname;
-
-            // Try path-based URL first: /b/SEED.THEME.CELLS
-            const pathMatch = pathToCheck.match(/^\/b\/([^.]+)\.([^.]+)\.([^.]+)/);
-            if (pathMatch) {
-                seed = pathMatch[1];
-                theme = pathMatch[2];
-                checkedParam = pathMatch[3];
-            } else {
-                // Fall back to query params for backward compatibility
-                const params = new URLSearchParams(window.location.search);
-                seed = params.get('b');
-                theme = params.get('t');
-                checkedParam = params.get('c');
+            // New compact format: ?g=XXXXXXXXXXXX (12-char encoded ID)
+            const gParam = params.get('g');
+            if (gParam && gParam.length === 12) {
+                const decoded = decodeBoardId(gParam);
+                currentSeed = decoded.seed;
+                if (decoded.theme && themes[decoded.theme]) {
+                    currentTheme = decoded.theme;
+                    applyVisualTheme(decoded.theme);
+                }
+                isDailyMode = false;
+                localStorage.setItem('ib_daily', 'false');
+                window._challengerCells = decoded.cells;
+                return true;
             }
+
+            // Legacy fallback: ?b=SEED&t=THEME&c=CELLS
+            const seed = params.get('b');
+            const theme = params.get('t');
+            const checkedParam = params.get('c');
 
             if (seed) {
                 currentSeed = parseInt(seed, 10);
@@ -3669,7 +3686,6 @@
                 isDailyMode = false;
                 localStorage.setItem('ib_daily', 'false');
 
-                // Store challenger's checked cells for comparison
                 if (checkedParam) {
                     const num = parseInt(checkedParam, 36);
                     const bits = num.toString(2).padStart(25, '0');
@@ -3743,7 +3759,7 @@
 
             // Clear challenger data and URL
             window._challengerCells = null;
-            history.replaceState({}, '', '/');
+            history.replaceState({}, '', window.location.pathname);
         }
 
         // ─── Share Panel Logic ───
@@ -3757,7 +3773,7 @@
             return `I'm a ${title}! \uD83C\uDF89 How many squares can you check off? Try Icebreaker Bingo!`;
         }
 
-        const SHARE_URL = 'https://icebreakerbingo.com';
+        const SHARE_URL = `${window.location.protocol}//${window.location.host}`;
         let currentImageBlob = null;
 
         let achToastTimeout = null;
@@ -3967,7 +3983,7 @@
                 text-align: center; padding-top: 4px;
             `;
             cta.innerHTML = `
-                <span style="font-family: Inter, system-ui, sans-serif; font-size: 13px; font-weight: 500; color: #64748b;">Play yours at </span><span style="font-family: Fredoka, Inter, system-ui, sans-serif; font-size: 16px; font-weight: 700; color: #e2e8f0;">icebreakerbingo.com</span>
+                <span style="font-family: Inter, system-ui, sans-serif; font-size: 13px; font-weight: 500; color: #64748b;">Play yours at </span><span style="font-family: Fredoka, Inter, system-ui, sans-serif; font-size: 16px; font-weight: 700; color: #e2e8f0;">${window.location.host}</span>
             `;
             wrapper.appendChild(cta);
 
@@ -4013,7 +4029,8 @@
                         await navigator.share({
                             files: [file],
                             title: 'Icebreaker Bingo',
-                            text: getShareText()
+                            text: getShareText(),
+                            url: getBoardUrl()
                         });
                         return;
                     }
@@ -4056,14 +4073,13 @@
             const shareUrl = getBoardUrl();
             const encodedText = encodeURIComponent(shareText);
             const encodedUrl = encodeURIComponent(shareUrl);
-
             const urls = {
                 x: `https://x.com/intent/post?text=${encodedText}&url=${encodedUrl}`,
                 threads: `https://www.threads.net/intent/post?text=${encodedText}%20${encodedUrl}`,
                 facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}&quote=${encodedText}`,
                 instagram: 'https://www.instagram.com',
                 whatsapp: `https://wa.me/?text=${encodedText}%20${encodedUrl}`,
-                linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(SHARE_URL)}`,
+                linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
                 email: `mailto:?subject=${encodeURIComponent('Icebreaker Bingo')}&body=${encodedText}%0A%0A${encodedUrl}`
             };
 
@@ -4152,7 +4168,6 @@
                     platform === 'facebook') ? 'post' : 'message';
                 document.getElementById('pasteCoachTarget').textContent = targetWord;
             }
-
             // Reset phases: show loading, hide all instruction modes
             loadingEl.classList.remove('fade-out');
             loadingEl.style.display = '';
@@ -4209,7 +4224,8 @@
                 await navigator.share({
                     files: [file],
                     title: 'Icebreaker Bingo',
-                    text: getShareText()
+                    text: getShareText(),
+                    url: getBoardUrl()
                 });
             } catch (err) {
                 if (err.name !== 'AbortError') {
