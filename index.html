@@ -4063,7 +4063,7 @@
                 facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}&quote=${encodedText}`,
                 instagram: 'https://www.instagram.com',
                 whatsapp: `https://wa.me/?text=${encodedText}%20${encodedUrl}`,
-                linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
+                linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(SHARE_URL)}`,
                 email: `mailto:?subject=${encodeURIComponent('Icebreaker Bingo')}&body=${encodedText}%0A%0A${encodedUrl}`
             };
 
